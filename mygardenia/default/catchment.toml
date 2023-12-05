@@ -1,0 +1,21 @@
+[description]
+project = ""
+basin = ""
+
+[data]
+# forcings
+simulation.rainfall = ""
+simulation.pet = ""
+simulation.air-temp = ""
+simulation.snowfall = ""
+forecast.rainfall = ""
+forecast.pet = ""
+forecast.air-temp = ""
+forecast.snowfall = ""
+# observations
+observation.streamflow = ""
+observation.piezo-level = ""
+# influences
+influence.pumping_or_injection = ""
+# others
+other.weather_tile_weights = ""

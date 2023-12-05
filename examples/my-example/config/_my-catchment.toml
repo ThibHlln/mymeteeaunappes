@@ -1,0 +1,21 @@
+[description]
+project = "example run"
+basin = "example"
+
+[data]
+# forcings
+simulation.rainfall = "pluie.prn"
+simulation.pet = "etp.prn"
+simulation.air-temp = ""
+simulation.snowfall = ""
+forecast.rainfall = ""
+forecast.pet = ""
+forecast.air-temp = ""
+forecast.snowfall = ""
+# observations
+observation.streamflow = "debit.prn"
+observation.piezo-level = "niveau.prn"
+# influences
+influence.pumping_or_injection = ""
+# others
+other.weather_tile_weights = ""

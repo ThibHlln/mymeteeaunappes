@@ -1,3 +1,4 @@
+*.pyc
 # ignore gardenia files
 gardelis.txt
 gardepara.out
