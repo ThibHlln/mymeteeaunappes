@@ -1,6 +1,7 @@
 import subprocess
 import os
 import re
+import glob
 import pandas as pd
 
 from .convert import (
@@ -56,9 +57,19 @@ class GardeniaModel(object):
             print(msg)
 
         # ----------------------------------------------------------------------
+        # move output files
+        # ----------------------------------------------------------------------
+        for f in glob.glob(f'{self._working_dir}{os.sep}*.*'):
+            filename = f.split(os.sep)[-1]
+            os.replace(
+                os.sep.join([self._working_dir, filename]),
+                os.sep.join([self._working_dir, 'output', filename])
+            )
+
+        # ----------------------------------------------------------------------
         # post-process outputs
         # ----------------------------------------------------------------------
-        output_file = separator.join([self._working_dir, "gardesim.prn"])
+        output_file = os.sep.join([self._working_dir, 'output', "gardesim.prn"])
 
         beg_river = None
         end_river = None
@@ -108,5 +119,3 @@ class GardeniaModel(object):
                 separator.join([self._working_dir, "output", "piezo_sim_obs.csv"]),
                 index=False
             )
-
-
