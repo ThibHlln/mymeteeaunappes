@@ -34,16 +34,11 @@ def _get_dataframe(endpoint: str, operation: str, parameters: dict):
     ).T
 
 
-def get_hydrometry(code_entite: str, grandeur_hydro: str):
+def get_hydrometry(code_entite: str):
     # check code format
     if not re.compile(r'^[A-Z]\d{9}$').findall(code_entite):
         raise ValueError(
             "code_entite format is invalid"
-        )
-    # check hydro variable value
-    if grandeur_hydro not in ['Q', 'H', 'Q,H']:
-        raise ValueError(
-            "grandeur_hydro can only be 'Q'/'H'/'Q,H'"
         )
 
     return _get_dataframe(
@@ -51,7 +46,7 @@ def get_hydrometry(code_entite: str, grandeur_hydro: str):
         operation="observations_tr",
         parameters={
             'code_entite': code_entite,
-            'grandeur_hydro': grandeur_hydro,
+            'grandeur_hydro': 'Q',
             'size': 10000
         }
     )
