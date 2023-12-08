@@ -152,9 +152,25 @@ def get_hydrometry(code_station: str) -> pd.DataFrame or None:
     # return potentially aggregated elaborated and/or real-time data
     # ------------------------------------------------------------------
     if (data_elab is not None) or (data_tr is not None):
-        data = pd.concat([data_elab, data_tr]).reset_index(drop=True)
-        return data
+        # merge along dates
+        data = pd.merge(
+            left=(
+                data_elab if data_elab is not None
+                else pd.DataFrame(columns=['Date', 'Debit'])
+            ),
+            right=(
+                data_tr if data_tr is not None
+                else pd.DataFrame(columns=['Date', 'Debit'])
+            ),
+            on='Date', how='outer', suffixes=('_cons', '_tr')
+        )
 
+        # deal with overlap (favour elaborated)
+        data['Debit'] = np.where(
+            data['Debit_elab'].isna(), data['Debit_tr'], data['Debit_elab']
+        )
+
+        return data.drop(columns=['Debit_elab', 'Debit_tr'])
 
 
 def get_piezometry(code_bss: str):
