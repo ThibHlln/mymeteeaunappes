@@ -6,6 +6,7 @@ import re
 
 # "global" (module-wide) variables for memoization
 _hydrometry_stations = None
+_piezometry_stations = None
 
 
 def _get_json_data(url: str, data: list) -> list:
@@ -23,7 +24,9 @@ def _get_json_data(url: str, data: list) -> list:
         )
 
 
-def _get_dataframe(endpoint: str, operation: str, parameters: dict) -> pd.DataFrame or None:
+def _get_dataframe(
+        endpoint: str, operation: str, parameters: dict
+) -> pd.DataFrame | None:
     url = (
         f"https://hubeau.eaufrance.fr/api/{endpoint}/{operation}?"
         f"{'&'.join(['='.join([k, str(v)]) for k, v in parameters.items()])}"
@@ -36,6 +39,119 @@ def _get_dataframe(endpoint: str, operation: str, parameters: dict) -> pd.DataFr
             [pd.DataFrame.from_dict(i, orient='index') for i in data],
             axis=1
         ).T
+
+
+def _get_consolidated_dataframe(
+        api_kind: str, api_endpoint: str, api_operation: str,
+        station_field: str, station_code: str,
+        date_field: str, date_format: str, date_label: str,
+        measure_field: str, measure_label: str,
+        quality_field: str, good_quality_values: list,
+        extra_parameters: dict = None
+) -> pd.DataFrame | None:
+    try:
+        data = _get_dataframe(
+            endpoint=api_endpoint,
+            operation=api_operation,
+            parameters={
+                station_field: station_code,
+                'fields': ','.join(
+                    [date_field, measure_field, quality_field]
+                ),
+                'size': 10000
+            } | (extra_parameters if extra_parameters else {})
+        )
+    except RuntimeError as e:
+        raise RuntimeError(
+            f"consolidated {api_kind} data retrieval "
+            f"failed for {station_code}"
+        ) from e
+
+    if data is not None:
+        # check consolidated data quality
+        data[measure_field][
+            np.isin(data[quality_field].values, good_quality_values)
+        ] = np.nan
+        data = data.drop(columns=quality_field)
+
+        # convert to datetime
+        data[date_field] = pd.to_datetime(
+            data[date_field], format=date_format
+        )
+        # rename headers
+        data.columns = [date_label, measure_label]
+
+        return data
+
+
+def _get_realtime_dataframe(
+        api_kind: str, api_endpoint: str, api_operation: str,
+        station_field: str, station_code: str,
+        date_field: str, date_format: str, date_label: str,
+        measure_field: str, measure_label: str,
+        extra_parameters: dict = None
+) -> pd.DataFrame | None:
+    try:
+        data = _get_dataframe(
+            endpoint=api_endpoint,
+            operation=api_operation,
+            parameters={
+                station_field: station_code,
+                'fields': ','.join(
+                    [date_field, measure_field]
+                ),
+                'size': 10000
+            } | (extra_parameters if extra_parameters else {})
+        )
+    except RuntimeError as e:
+        raise RuntimeError(
+            f"real-time {api_kind} data retrieval "
+            f"failed for {station_code}"
+        ) from e
+
+    if data is not None:
+        # aggregate real-time data to mean daily values
+        data[date_field] = pd.to_datetime(
+            data[date_field], format=date_format
+        )
+        data = data.set_index(date_field)
+        data = data.resample('D').agg('mean')
+        data.reset_index(inplace=True)
+
+        # rename headers
+        data.columns = [date_label, measure_label]
+
+        return data
+
+
+def _merge_consolidated_and_realtime_dataframe(
+        data_cons: (pd.DataFrame | None), data_tr: (pd.DataFrame | None),
+        date_label: str, measure_label: str
+) -> pd.DataFrame | None:
+
+    if (data_cons is not None) or (data_tr is not None):
+        # merge along dates
+        data = pd.merge(
+            left=(
+                data_cons if data_cons is not None
+                else pd.DataFrame(columns=[date_label, measure_label])
+            ),
+            right=(
+                data_tr if data_tr is not None
+                else pd.DataFrame(columns=[date_label, measure_label])
+            ),
+            on=date_label, how='outer', suffixes=('_cons', '_tr')
+        )
+
+        # deal with overlap (favour consolidated)
+        data[measure_label] = np.where(
+            data[f'{measure_label}_cons'].isna(),
+            data[f'{measure_label}_tr'], data[f'{measure_label}_cons']
+        )
+
+        return data.drop(
+            columns=[f'{measure_label}_cons', f'{measure_label}_tr']
+        )
 
 
 def _set_and_get_hydrometry_stations() -> list:
@@ -63,7 +179,7 @@ def _set_and_get_hydrometry_stations() -> list:
     return _hydrometry_stations
 
 
-def get_hydrometry(code_station: str) -> pd.DataFrame or None:
+def get_hydrometry(code_station: str) -> pd.DataFrame | None:
     # collect list of hydrometric stations (if not already collected)
     hydrometry_stations = (
         _hydrometry_stations if _hydrometry_stations is not None
@@ -78,119 +194,120 @@ def get_hydrometry(code_station: str) -> pd.DataFrame or None:
             f"is not in operation anymore"
         )
 
-    # ------------------------------------------------------------------
+    # set headers for output dataframe
+    date_label = 'Date'
+    measure_label = 'Debit'
+
     # get elaborated data
-    # ------------------------------------------------------------------
-    try:
-        data_elab = _get_dataframe(
-            endpoint="v1/hydrometrie",
-            operation="obs_elab",
-            parameters={
-                'code_entite': code_station,
-                'grandeur_hydro': 'Q',
-                'fields': ','.join(
-                    ['date_obs_elab', 'resultat_obs_elab', 'code_statut']
-                ),
-                'size': 10000
-            }
-        )
-    except RuntimeError as e:
-        raise RuntimeError(
-            f"elaborated hydrometric data retrieval failed "
-            f"for {code_station}"
-        ) from e
+    data_cons = _get_consolidated_dataframe(
+        api_kind='hydrometry', api_endpoint='v1/hydrometrie',
+        api_operation='obs_elab',
+        station_field='code_entite', station_code=code_station,
+        date_field='date_obs_elab', date_format='%Y-%m-%d',
+        date_label=date_label,
+        measure_field='resultat_obs_elab', measure_label=measure_label,
+        quality_field='code_statut', good_quality_values=['16', '20'],
+        extra_parameters={'grandeur_hydro': 'Q'}
+    )
 
-    if data_elab is not None:
-        # check elaborated data quality
-        data_elab['resultat_obs_elab'][
-            np.isin(data_elab['code_statut'].values, ('16', '20'))
-        ] = np.nan
-        data_elab.drop(columns='code_statut', inplace=True)
-
-        # convert to datetime
-        data_elab['date_obs_elab'] = pd.to_datetime(
-            data_elab['date_obs_elab'], format='%Y-%m-%d'
-        )
-        # rename headers
-        data_elab.columns = ['Date', 'Debit']
-
-    # ------------------------------------------------------------------
     # get real time data
-    # ------------------------------------------------------------------
-    try:
-        data_tr = _get_dataframe(
-            endpoint="v1/hydrometrie",
-            operation="observations_tr",
-            parameters={
-                'code_entite': code_station,
-                'grandeur_hydro': 'Q',
-                'fields': ','.join(
-                    ['date_obs', 'resultat_obs']
-                ),
-                'size': 10000
-            }
-        )
-    except RuntimeError as e:
-        raise RuntimeError(
-            f"real-time hydrometric data retrieval failed "
-            f"for {code_station}"
-        ) from e
+    data_tr = _get_realtime_dataframe(
+        api_kind='hydrometry', api_endpoint='v1/hydrometrie',
+        api_operation='observations_tr',
+        station_field='code_entite', station_code=code_station,
+        date_field='date_obs', date_format='%Y-%m-%dT%H:%M:%SZ',
+        date_label=date_label,
+        measure_field='resultat_obs', measure_label=measure_label,
+        extra_parameters={'grandeur_hydro': 'Q'}
+    )
 
-    if data_tr is not None:
-        # aggregate real-time data to mean daily values
-        data_tr['date_obs'] = pd.to_datetime(
-            data_tr['date_obs'], format='%Y-%m-%dT%H:%M:%SZ'
-        )
-        data_tr.set_index('date_obs', inplace=True)
-        data_tr = data_tr.resample('D').agg('mean')
-        data_tr.reset_index(inplace=True)
-
-        # rename headers
-        data_tr.columns = ['Date', 'Debit']
-
-    # ------------------------------------------------------------------
     # return potentially aggregated elaborated and/or real-time data
-    # ------------------------------------------------------------------
-    if (data_elab is not None) or (data_tr is not None):
-        # merge along dates
-        data = pd.merge(
-            left=(
-                data_elab if data_elab is not None
-                else pd.DataFrame(columns=['Date', 'Debit'])
-            ),
-            right=(
-                data_tr if data_tr is not None
-                else pd.DataFrame(columns=['Date', 'Debit'])
-            ),
-            on='Date', how='outer', suffixes=('_cons', '_tr')
-        )
-
-        # deal with overlap (favour elaborated)
-        data['Debit'] = np.where(
-            data['Debit_elab'].isna(), data['Debit_tr'], data['Debit_elab']
-        )
-
-        return data.drop(columns=['Debit_elab', 'Debit_tr'])
-
-
-def get_piezometry(code_bss: str):
-    # check code format
-    if not re.compile(r'^\d{5}[A-Z]\d{4}/[-A-Z]+$').findall(code_bss):
-        raise ValueError(
-            "code_bss format is invalid"
-        )
-
-    return _get_dataframe(
-        endpoint="v1/niveaux_nappes",
-        operation="chroniques",
-        parameters={
-            'code_bss': code_bss,
-            'size': 10000
-        }
+    return _merge_consolidated_and_realtime_dataframe(
+        data_cons, data_tr, date_label, measure_label
     )
 
 
-def get_withdrawal(code_ouvrage: str):
+# get list of available stations still on operation
+def _set_and_get_piezometry_stations() -> list:
+    global _piezometry_stations
+
+    # (loop through departements to bypass 20000 query size limit)
+    piezometry_stations = None
+    for departement in (
+            [f'{i:02}' for i in range(1, 96) if i != 20]
+            + ['2A', '2B', '971', '972', '973', '974', '976']
+    ):
+        piezometry_stations = pd.concat(
+            [
+                piezometry_stations, _get_dataframe(
+                    endpoint="v1/niveaux_nappes",
+                    operation="stations",
+                    parameters={
+                        'fields': 'code_bss',
+                        'code_departement': departement,
+                        'size': 10000
+                    }
+                )
+            ]
+        )
+
+    # check whether at least one station exists
+    if piezometry_stations is not None:
+        _piezometry_stations = (
+            piezometry_stations['code_bss'].values.tolist()
+        )
+    else:
+        _piezometry_stations = []
+
+    return _piezometry_stations
+
+
+def get_piezometry(code_bss: str) -> pd.DataFrame | None:
+    # collect list of piezometric stations (if not already collected)
+    piezometry_stations = (
+        _piezometry_stations if _piezometry_stations
+        else globals()[f"_set_and_get_{'piezometry'}_stations"]()
+    )
+
+    # check code BSS is available
+    if code_bss not in piezometry_stations:
+        raise ValueError(
+            f"code BSS {repr(code_bss)} is not "
+            f"available in Hub'Eau piezometry API"
+        )
+
+    # set headers for output dataframe
+    date_label = 'Date'
+    measure_label = 'Niveau'
+
+    # get consolidated data
+    data_cons = _get_consolidated_dataframe(
+        api_kind='piezometry', api_endpoint='v1/niveaux_nappes',
+        api_operation='chroniques',
+        station_field='code_bss', station_code=code_bss,
+        date_field='date_mesure', date_format='%Y-%m-%d',
+        date_label=date_label,
+        measure_field='niveau_nappe_eau', measure_label=measure_label,
+        quality_field='qualification', good_quality_values=['Correcte ']
+    )
+
+    # get real time data
+    data_tr = _get_realtime_dataframe(
+        api_kind='piezometry', api_endpoint='v1/niveaux_nappes',
+        api_operation='chroniques_tr',
+        station_field='code_bss', station_code=code_bss,
+        date_field='date_mesure', date_format='%Y-%m-%dT%H:%M:%SZ',
+        date_label=date_label,
+        measure_field='niveau_eau_ngf', measure_label=measure_label
+    )
+
+    # return potentially merged consolidated and/or real-time data
+    return _merge_consolidated_and_realtime_dataframe(
+        data_cons, data_tr, date_label, measure_label
+    )
+
+
+def get_withdrawal(code_ouvrage: str) -> pd.DataFrame | None:
     # check code format
     if not re.compile(r'^OPR\d{10}$').findall(code_ouvrage):
         raise ValueError(
