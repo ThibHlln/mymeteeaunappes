@@ -202,6 +202,40 @@ def _set_and_get_hydrometry_stations() -> list:
 def get_hydrometry(
         code_station: str, include_realtime: bool = True
 ) -> pd.DataFrame | None:
+    """Collect observed hydrometric data for a given station.
+
+    :Parameters:
+
+        code_station: `str`
+            The code of the hydrometric station for which streamflow
+            data is requested from HydroPortail via Hub'Eau.
+
+        include_realtime: `bool`
+            Whether to include real-time data (if available) and
+            aggregate it with consolidated data. If not provided,
+            set to default value `True`.
+
+    :Returns:
+
+        `pandas.DataFrame` or `None`
+            The dataframe containing the streamflow time series (two
+            columns *Date* and *Debit*). If no data is available on
+            Hub'Eau, `None` is returned.
+
+    **Examples**
+
+    Collecting consolidated and real-time streamflow data for a given
+    hydrometric station:
+
+    >>> get_hydrometry(code_station='M107302001')  # doctest: +ELLIPSIS
+               Date       Debit
+    0    1996-08-02        82.0
+    1    1996-08-03        81.0
+    2    1996-08-04        79.0
+    3    1996-08-05        67.0
+    4    1996-08-06        57.0
+    ...
+    """
     # collect list of hydrometric stations (if not already collected)
     hydrometry_stations = (
         _hydrometry_stations if _hydrometry_stations is not None
@@ -289,6 +323,40 @@ def _set_and_get_piezometry_stations() -> list:
 def get_piezometry(
         code_bss: str, include_realtime: bool = True
 ) -> pd.DataFrame | None:
+    """Collect observed piezometric data for a given station.
+
+    :Parameters:
+
+        code_bss: `str`
+            The code of the piezometric station for which groundwater
+            level data is requested from ADES via Hub'Eau.
+
+        include_realtime: `bool`
+            Whether to include real-time data (if available) and
+            aggregate it with consolidated data. If not provided,
+            set to default value `True`.
+
+    :Returns:
+
+        `pandas.DataFrame` or `None`
+            The dataframe containing the groundwater level time series
+            (two columns *Date* and *Niveau*). If no data is available
+            on Hub'Eau, `None` is returned.
+
+    **Examples**
+
+    Collecting consolidated and real-time streamflow data for a given
+    piezometric station:
+
+    >>> get_piezometry(code_bss='06301X0131/F')  # doctest: +ELLIPSIS
+               Date  Niveau
+    0    2004-01-01   395.5
+    1    2004-01-02  395.49
+    2    2004-01-03  395.48
+    3    2004-01-04  395.47
+    4    2004-01-05  395.46
+    ...
+    """
     # collect list of piezometric stations (if not already collected)
     piezometry_stations = (
         _piezometry_stations if _piezometry_stations is not None
@@ -382,6 +450,36 @@ def _set_and_get_withdrawal_stations() -> list:
 
 
 def get_withdrawal(code_ouvrage: str) -> pd.DataFrame | None:
+    """Collect observed piezometric data for a given station.
+
+    :Parameters:
+
+        code_bss: `str`
+            The code of the withdrawal point for which extracted water
+            volume data is requested from BNPE via Hub'Eau.
+
+    :Returns:
+
+        `pandas.DataFrame` or `None`
+            The dataframe containing the withdrawn water volume time
+            series (two columns *Date* and *Prelevement continental*/
+            *Prelevement souterrain*). If no data is available on
+            Hub'Eau, `None` is returned.
+
+    **Examples**
+
+    Collecting consolidated water withdrawal data for a given extraction
+    point:
+
+    >>> get_withdrawal(code_ouvrage='OPR0000000003')  # doctest: +ELLIPSIS
+            Date Prelevement souterrain
+    0 2012-01-01                12898.0
+    1 2013-01-01                13065.0
+    2 2014-01-01                11994.0
+    3 2015-01-01                12297.0
+    4 2016-01-01                12566.0
+    ...
+    """
     # collect list of piezometric stations (if not already collected)
     surface_withdrawal_stations, underground_withdrawal_stations = (
         _withdrawal_stations if _withdrawal_stations is not None
@@ -402,8 +500,8 @@ def get_withdrawal(code_ouvrage: str) -> pd.DataFrame | None:
     # set headers for output dataframe
     date_label = 'Date'
     measure_label = (
-        'Prelevement Continental' if surface
-        else 'Prelevement Souterrain'
+        'Prelevement continental' if surface
+        else 'Prelevement souterrain'
     )
 
     # get consolidated data
