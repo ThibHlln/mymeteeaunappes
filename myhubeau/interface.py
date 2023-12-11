@@ -418,4 +418,7 @@ def get_withdrawal(code_ouvrage: str) -> pd.DataFrame | None:
         good_quality_values=['Correcte']
     )
 
-    return data_cons
+    # return potentially merged consolidated and/or real-time data
+    return _merge_consolidated_and_realtime_dataframe(
+        data_cons, None, date_label, measure_label
+    )
