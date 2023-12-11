@@ -7,6 +7,7 @@ import re
 # "global" (module-wide) variables for memoization
 _hydrometry_stations = None
 _piezometry_stations = None
+_withdrawal_stations = None
 
 
 def _get_json_data(url: str, data: list) -> list:
@@ -17,7 +18,15 @@ def _get_json_data(url: str, data: list) -> list:
         return data
     elif r.status_code == 206:
         data.extend(r.json()['data'])
-        return _get_json_data(r.json()['next'], data)
+        if r.json()['next']:
+            return _get_json_data(r.json()['next'], data)
+        else:
+            # catch edge case (bug?) where return code is 206 (i.e.
+            # remaining data to be fetched) but next URL is None (e.g.
+            # this is the case for https://hubeau.eaufrance.fr/api/
+            # v1/prelevements/referentiel/points_prelevement?
+            # code_departement=40&page=2&size=10000)
+            return data
     else:
         raise RuntimeError(
             f"data retrieval failed for query with URL {url}"
@@ -313,18 +322,87 @@ def get_piezometry(code_bss: str) -> pd.DataFrame | None:
     )
 
 
-def get_withdrawal(code_ouvrage: str) -> pd.DataFrame | None:
-    # check code format
-    if not re.compile(r'^OPR\d{10}$').findall(code_ouvrage):
-        raise ValueError(
-            "code_ouvrage format is invalid"
+def _set_and_get_withdrawal_stations() -> list:
+    global _withdrawal_stations
+
+    # (loop through departements to bypass 20000 query size limit)
+    withdrawal_stations = None
+    for departement in (
+            [f'{i:02}' for i in range(1, 96) if i != 20]
+            + ['2A', '2B', '971', '972', '973', '974', '976']
+    ):
+        withdrawal_stations = pd.concat(
+            [
+                withdrawal_stations, _get_dataframe(
+                    endpoint="v1/prelevements",
+                    operation="referentiel/points_prelevement",
+                    parameters={
+                        'fields': 'code_ouvrage,code_type_milieu',
+                        'code_departement': departement,
+                        'size': 10000
+                    }
+                )
+            ]
         )
 
-    return _get_dataframe(
-        endpoint="v1/prelevements",
-        operation="chroniques",
-        parameters={
-            'code_ouvrage': code_ouvrage,
-            'size': 10000
-        }
+    # check whether at least one station exists
+    if withdrawal_stations is not None:
+        surface_withdrawal_stations = (
+            withdrawal_stations['code_ouvrage'][
+                withdrawal_stations['code_type_milieu'] == 'CONT'
+                ]
+        ).values.tolist()
+
+        underground_withdrawal_stations = (
+            withdrawal_stations['code_ouvrage'][
+                withdrawal_stations['code_type_milieu'] == 'SOUT'
+                ]
+        ).values.tolist()
+
+        _withdrawal_stations = [
+            surface_withdrawal_stations, underground_withdrawal_stations
+        ]
+    else:
+        _withdrawal_stations = [[], []]
+
+    return _withdrawal_stations
+
+
+def get_withdrawal(code_ouvrage: str) -> pd.DataFrame | None:
+    # collect list of piezometric stations (if not already collected)
+    surface_withdrawal_stations, underground_withdrawal_stations = (
+        _withdrawal_stations if _withdrawal_stations is not None
+        else _set_and_get_withdrawal_stations()
     )
+
+    # check code ouvrage is available
+    if code_ouvrage in surface_withdrawal_stations:
+        surface = True
+    elif code_ouvrage in underground_withdrawal_stations:
+        surface = False
+    else:
+        raise ValueError(
+            f"code ouvrage {repr(code_ouvrage)} is not "
+            f"available in Hub'Eau piezometry API"
+        )
+
+    # set headers for output dataframe
+    date_label = 'Date'
+    measure_label = (
+        'Prelevement Continental' if surface
+        else 'Prelevement Souterrain'
+    )
+
+    # get consolidated data
+    data_cons = _get_consolidated_dataframe(
+        api_kind='withdrawal', api_endpoint='v1/prelevements',
+        api_operation='chroniques',
+        station_field='code_ouvrage', station_code=code_ouvrage,
+        date_field='annee', date_format='%Y',
+        date_label=date_label,
+        measure_field='volume', measure_label=measure_label,
+        quality_field='libelle_qualification_volume',
+        good_quality_values=['Correcte']
+    )
+
+    return data_cons
