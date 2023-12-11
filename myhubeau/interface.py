@@ -77,6 +77,9 @@ def _get_consolidated_dataframe(
         ) from e
 
     if data is not None:
+        # make sure data is in chronological order
+        data = data.sort_values(by=date_field)
+
         # check consolidated data quality
         data[measure_field][
             ~np.isin(data[quality_field].values, good_quality_values)
@@ -119,6 +122,9 @@ def _get_realtime_dataframe(
         ) from e
 
     if data is not None:
+        # make sure data is in chronological order
+        data = data.sort_values(by=date_field)
+        
         # aggregate real-time data to mean daily values
         data[date_field] = pd.to_datetime(
             data[date_field], format=date_format
@@ -223,7 +229,7 @@ def get_hydrometry(
         date_label=date_label,
         measure_field='resultat_obs_elab', measure_label=measure_label,
         quality_field='code_qualification', good_quality_values=[16, 20],
-        extra_parameters={'grandeur_hydro': 'Q'}
+        extra_parameters={'grandeur_hydro_elab': 'QmJ'}
     )
 
     data_tr = None
