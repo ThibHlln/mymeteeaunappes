@@ -70,7 +70,7 @@ def _get_consolidated_dataframe(
     if data is not None:
         # check consolidated data quality
         data[measure_field][
-            np.isin(data[quality_field].values, good_quality_values)
+            ~np.isin(data[quality_field].values, good_quality_values)
         ] = np.nan
         data = data.drop(columns=quality_field)
 
@@ -145,6 +145,12 @@ def _merge_consolidated_and_realtime_dataframe(
 
         # deal with overlap (favour consolidated)
         data[measure_label] = np.where(
+            # could use dates as filter rather than NaN because, towards
+            # the end of the time series, real-time data are included in
+            # consolidated data before being given a quality value but
+            # there is no reason to include real-time data (without
+            # quality value) and not to include consolidated data
+            # without quality value
             data[f'{measure_label}_cons'].isna(),
             data[f'{measure_label}_tr'], data[f'{measure_label}_cons']
         )
@@ -206,7 +212,7 @@ def get_hydrometry(code_station: str) -> pd.DataFrame | None:
         date_field='date_obs_elab', date_format='%Y-%m-%d',
         date_label=date_label,
         measure_field='resultat_obs_elab', measure_label=measure_label,
-        quality_field='code_statut', good_quality_values=['16', '20'],
+        quality_field='code_qualification', good_quality_values=[16, 20],
         extra_parameters={'grandeur_hydro': 'Q'}
     )
 
@@ -265,8 +271,8 @@ def _set_and_get_piezometry_stations() -> list:
 def get_piezometry(code_bss: str) -> pd.DataFrame | None:
     # collect list of piezometric stations (if not already collected)
     piezometry_stations = (
-        _piezometry_stations if _piezometry_stations
-        else globals()[f"_set_and_get_{'piezometry'}_stations"]()
+        _piezometry_stations if _piezometry_stations is not None
+        else _set_and_get_piezometry_stations()
     )
 
     # check code BSS is available
@@ -288,7 +294,7 @@ def get_piezometry(code_bss: str) -> pd.DataFrame | None:
         date_field='date_mesure', date_format='%Y-%m-%d',
         date_label=date_label,
         measure_field='niveau_nappe_eau', measure_label=measure_label,
-        quality_field='qualification', good_quality_values=['Correcte ']
+        quality_field='qualification', good_quality_values=['Correcte']
     )
 
     # get real time data
