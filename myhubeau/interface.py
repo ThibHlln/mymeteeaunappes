@@ -137,7 +137,6 @@ def _merge_consolidated_and_realtime_dataframe(
         data_cons: (pd.DataFrame | None), data_tr: (pd.DataFrame | None),
         date_label: str, measure_label: str
 ) -> pd.DataFrame | None:
-
     if (data_cons is not None) or (data_tr is not None):
         # merge along dates
         data = pd.merge(
@@ -194,7 +193,9 @@ def _set_and_get_hydrometry_stations() -> list:
     return _hydrometry_stations
 
 
-def get_hydrometry(code_station: str) -> pd.DataFrame | None:
+def get_hydrometry(
+        code_station: str, include_realtime: bool = True
+) -> pd.DataFrame | None:
     # collect list of hydrometric stations (if not already collected)
     hydrometry_stations = (
         _hydrometry_stations if _hydrometry_stations is not None
@@ -225,16 +226,18 @@ def get_hydrometry(code_station: str) -> pd.DataFrame | None:
         extra_parameters={'grandeur_hydro': 'Q'}
     )
 
-    # get real time data
-    data_tr = _get_realtime_dataframe(
-        api_kind='hydrometry', api_endpoint='v1/hydrometrie',
-        api_operation='observations_tr',
-        station_field='code_entite', station_code=code_station,
-        date_field='date_obs', date_format='%Y-%m-%dT%H:%M:%SZ',
-        date_label=date_label,
-        measure_field='resultat_obs', measure_label=measure_label,
-        extra_parameters={'grandeur_hydro': 'Q'}
-    )
+    data_tr = None
+    if include_realtime:
+        # get real time data
+        data_tr = _get_realtime_dataframe(
+            api_kind='hydrometry', api_endpoint='v1/hydrometrie',
+            api_operation='observations_tr',
+            station_field='code_entite', station_code=code_station,
+            date_field='date_obs', date_format='%Y-%m-%dT%H:%M:%SZ',
+            date_label=date_label,
+            measure_field='resultat_obs', measure_label=measure_label,
+            extra_parameters={'grandeur_hydro': 'Q'}
+        )
 
     # return potentially aggregated elaborated and/or real-time data
     return _merge_consolidated_and_realtime_dataframe(
@@ -277,7 +280,9 @@ def _set_and_get_piezometry_stations() -> list:
     return _piezometry_stations
 
 
-def get_piezometry(code_bss: str) -> pd.DataFrame | None:
+def get_piezometry(
+        code_bss: str, include_realtime: bool = True
+) -> pd.DataFrame | None:
     # collect list of piezometric stations (if not already collected)
     piezometry_stations = (
         _piezometry_stations if _piezometry_stations is not None
@@ -306,15 +311,17 @@ def get_piezometry(code_bss: str) -> pd.DataFrame | None:
         quality_field='qualification', good_quality_values=['Correcte']
     )
 
-    # get real time data
-    data_tr = _get_realtime_dataframe(
-        api_kind='piezometry', api_endpoint='v1/niveaux_nappes',
-        api_operation='chroniques_tr',
-        station_field='code_bss', station_code=code_bss,
-        date_field='date_mesure', date_format='%Y-%m-%dT%H:%M:%SZ',
-        date_label=date_label,
-        measure_field='niveau_eau_ngf', measure_label=measure_label
-    )
+    data_tr = None
+    if include_realtime:
+        # get real time data
+        data_tr = _get_realtime_dataframe(
+            api_kind='piezometry', api_endpoint='v1/niveaux_nappes',
+            api_operation='chroniques_tr',
+            station_field='code_bss', station_code=code_bss,
+            date_field='date_mesure', date_format='%Y-%m-%dT%H:%M:%SZ',
+            date_label=date_label,
+            measure_field='niveau_eau_ngf', measure_label=measure_label
+        )
 
     # return potentially merged consolidated and/or real-time data
     return _merge_consolidated_and_realtime_dataframe(
