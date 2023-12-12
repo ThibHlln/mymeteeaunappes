@@ -131,7 +131,7 @@ def _get_realtime_dataframe(
         )
         data = data.set_index(date_field)
         data = data.resample('D').agg('mean')
-        data.reset_index(inplace=True)
+        data = data.reset_index()
 
         # rename headers
         data.columns = [date_label, measure_label]
