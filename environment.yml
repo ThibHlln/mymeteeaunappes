@@ -2,7 +2,12 @@ channels:
   - conda-forge
 dependencies:
   - python>=3.9
-  - toml
   - numpy
   - pandas
-  - requests
+  - toml  # mygardenia
+  - requests  # myhubeau
+  - cdsapi  # mycds
+  - xarray  # mycds
+  - cfgrib  # mycds
+  - dask  # mycds
+  - netcdf4  # mycds
