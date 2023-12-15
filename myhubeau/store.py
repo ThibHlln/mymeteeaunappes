@@ -10,7 +10,7 @@ def _save_df_as_prn_file(
         missing_value: float
 ):
     # format date to "Excel date"
-    df['Date'] = df['Date'].dt.strftime('%m/%d/%Y')
+    df['Date'] = df['Date'].dt.strftime('%d/%m/%Y')
 
     # fill in missing data with missing value flag
     if df[measure_label].isna().any():
