@@ -15,7 +15,7 @@ class GardeniaModel(object):
         self._tree = tree
         self._working_dir = working_dir
 
-    def run(self, verbose=False):
+    def run(self, execution_mode='M', verbose=False):
         separator = '/'
 
         rga_file = separator.join(['config', "auto.rga"])
@@ -47,7 +47,7 @@ class GardeniaModel(object):
         msg = subprocess.run(
             [
                 f"{os.environ['bin_Garden']}{os.sep}gardenia.exe",
-                rga_file, 'M'
+                rga_file, execution_mode
             ],
             cwd=self._working_dir,
             stdout=subprocess.PIPE
