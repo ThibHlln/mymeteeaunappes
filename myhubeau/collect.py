@@ -169,12 +169,11 @@ def _merge_consolidated_and_realtime_dataframe(
         )
 
         # fill in potentially missing dates
-        data = data.set_index(date_label)
-        data = data.reindex(
-            pd.date_range(
-                data[date_label].iloc[0], data[date_label].iloc[-1]
-            ), fill_value=np.nan
+        idx = pd.date_range(
+            data[date_label].iloc[0], data[date_label].iloc[-1]
         )
+        data = data.set_index(date_label)
+        data = data.reindex(idx, fill_value=np.nan)
         data = data.reset_index(names=date_label)
 
         return data.drop(
