@@ -23,6 +23,9 @@ def save_meteorology(
     df['ETP'] *= 1000  # m to mm
     df['Temperature'] -= 273.15  # K to degC
 
+    # format date to "Excel date"
+    df['Date'] = df['Date'].dt.strftime('%d/%m/%Y')
+
     for var in ['Pluie', 'ETP', 'Temperature']:
         df[['Date', var]].to_csv(
             os.sep.join(
