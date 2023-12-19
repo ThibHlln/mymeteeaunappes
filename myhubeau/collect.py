@@ -218,7 +218,7 @@ def get_hydrometry(
             The code of the hydrometric station for which streamflow
             data is requested from HydroPortail via Hub'Eau.
 
-        include_realtime: `bool`
+        include_realtime: `bool`, optional
             Whether to include real-time data (if available) and
             aggregate it with consolidated data. If not provided,
             set to default value `True`.
@@ -339,7 +339,7 @@ def get_piezometry(
             The code of the piezometric station for which groundwater
             level data is requested from ADES via Hub'Eau.
 
-        include_realtime: `bool`
+        include_realtime: `bool`, optional
             Whether to include real-time data (if available) and
             aggregate it with consolidated data. If not provided,
             set to default value `True`.

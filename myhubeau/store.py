@@ -48,6 +48,81 @@ def save_hydrometry(
         start: str = None, end: str = None,
         include_realtime: bool = True
 ):
+    """Generate a PRN file containing the observed hydrometric data
+    for a given station.
+
+    :Parameters:
+
+        code_station: `str`
+            The code of the hydrometric station for which streamflow
+            data is requested from HydroPortail via Hub'Eau.
+
+        working_dir: `str`
+            The file path the working directory to use to store the data.
+
+        filename: `str`, optional
+            The custom file name to use for storing the data. If not
+            provided, the filename is set 'my-debit.prn'.
+
+        start: `str`, optional
+            The start date to use for the data time series. The date must
+            be specified in a string following the ISO 8601-1:2019 standard,
+            i.e. “YYYY-MM-DD” (e.g. the 21st of May 2007 is “2007-05-21”).
+            If not provided, the earliest date in the available data is used.
+
+        end: `str`, optional
+            The end date to use for the data time series. The date must
+            be specified in a string following the ISO 8601-1:2019 standard,
+            i.e. “YYYY-MM-DD” (e.g. the 21st of May 2007 is “2007-05-21”).
+            If not provided, the latest date in the available data is used.
+
+        include_realtime: `bool`, optional
+            Whether to include real-time data (if available) and
+            aggregate it with consolidated data. If not provided,
+            set to default value `True`.
+
+    :Returns:
+
+        `None`
+
+    **Examples**
+
+    Generating a PRN file named *my-debit.prn* in *examples/my_example/data*
+    containing consolidated and real-time daily streamflow data for the
+    hydrometric station 'M107302001':
+
+    >>> save_hydrometry(
+    ...     code_station='M107302001', working_dir='examples/my_example'
+    ... )
+
+    Generating a PRN file named *my-debit.prn* in *examples/my_example/data*
+    containing only consolidated daily streamflow data for the hydrometric
+    station 'M107302001':
+
+    >>> save_hydrometry(
+    ...     code_station='M107302001', working_dir='examples/my_example',
+    ...     include_realtime=False
+    ... )
+
+    Generating a PRN file named *my-debit.prn* in *examples/my_example/data*
+    containing consolidated and real-time daily streamflow data for the
+    hydrometric station 'M107302001' for the period [1st Jan 1990,
+    1st Dec 2023]:
+
+    >>> save_hydrometry(
+    ...     code_station='M107302001', working_dir='examples/my_example',
+    ...     start='1990-01-01', end='2023-12-01'
+    ... )
+
+    Generating a PRN file named *debit-M107302001.prn* in
+    *examples/my_example/data*  containing consolidated and real-time
+    daily streamflow data for the hydrometric station 'M107302001':
+
+    >>> save_hydrometry(
+    ...     code_station='M107302001', working_dir='examples/my_example',
+    ...     filename='debit-M107302001.prn'
+    ... )
+    """
     # collect data as dataframe
     df = get_hydrometry(code_station, include_realtime)
 
@@ -63,6 +138,53 @@ def save_piezometry(
         start: str = None, end: str = None,
         include_realtime: bool = True
 ):
+    """Generate a PRN file containing the observed piezometric data
+    for a given station.
+
+    :Parameters:
+
+        code_bss: `str`
+            The BSS code of the piezometric station for which groundwater
+            level data is requested from ADES via Hub'Eau.
+
+        working_dir: `str`
+            The file path the working directory to use to store the data.
+
+        filename: `str`, optional
+            The custom file name to use for storing the data. If not
+            provided, the filename is set 'my-niveau.prn'.
+
+        start: `str`, optional
+            The start date to use for the data time series. The date must
+            be specified in a string following the ISO 8601-1:2019 standard,
+            i.e. “YYYY-MM-DD” (e.g. the 21st of May 2007 is “2007-05-21”).
+            If not provided, the earliest date in the available data is used.
+
+        end: `str`, optional
+            The end date to use for the data time series. The date must
+            be specified in a string following the ISO 8601-1:2019 standard,
+            i.e. “YYYY-MM-DD” (e.g. the 21st of May 2007 is “2007-05-21”).
+            If not provided, the latest date in the available data is used.
+
+        include_realtime: `bool`, optional
+            Whether to include real-time data (if available) and
+            aggregate it with consolidated data. If not provided,
+            set to default value `True`.
+
+    :Returns:
+
+        `None`
+
+    **Examples**
+
+    Generating a PRN file named *my-prelevement-.prn* in
+    *examples/my_example/data*  containing consolidated and real-time
+    daily groundwater level data for the  piezometric station '06301X0131/F':
+
+    >>> save_hydrometry(
+    ...     code_bss='06301X0131/F', working_dir='examples/my_example'
+    ... )
+    """
     # collect data as dataframe
     df = get_piezometry(code_bss, include_realtime)
 
@@ -77,6 +199,48 @@ def save_withdrawal(
         filename: str = None,
         start: str = None, end: str = None
 ):
+    """Generate a PRN file containing the observed piezometric data
+    for a given station.
+
+    :Parameters:
+
+        code_bss: `str`
+            The BSS code of the piezometric station for which groundwater
+            level data is requested from ADES via Hub'Eau.
+
+        working_dir: `str`
+            The file path the working directory to use to store the data.
+
+        filename: `str`, optional
+            The custom file name to use for storing the data. If not
+            provided, the filename is set 'my-niveau.prn'.
+
+        start: `str`, optional
+            The start date to use for the data time series. The date must
+            be specified in a string following the ISO 8601-1:2019 standard,
+            i.e. “YYYY-MM-DD” (e.g. the 21st of May 2007 is “2007-05-21”).
+            If not provided, the earliest date in the available data is used.
+
+        end: `str`, optional
+            The end date to use for the data time series. The date must
+            be specified in a string following the ISO 8601-1:2019 standard,
+            i.e. “YYYY-MM-DD” (e.g. the 21st of May 2007 is “2007-05-21”).
+            If not provided, the latest date in the available data is used.
+
+    :Returns:
+
+        `None`
+
+    **Examples**
+
+    Generating a PRN file named *my-prelevement-souterrain.prn* in
+    *examples/my_example/data* containing consolidated withdrawal data
+    for the extraction point 'OPR0000000003':
+
+    >>> save_hydrometry(
+    ...     code_ouvrage='OPR0000000003', working_dir='examples/my_example'
+    ... )
+    """
     # collect data as dataframe
     df = get_withdrawal(code_ouvrage)
     measure_label = df.columns.drop('Date')[0]
