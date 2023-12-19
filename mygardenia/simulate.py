@@ -224,8 +224,32 @@ class GardeniaModel(object):
         )[0].squeeze()
 
     def visualise(
-            self, variable: str, fig_size: tuple = None, filename: str = None
+            self, variable: str, filename: str = None, fig_size: tuple = None
     ):
+        """Visualise the simulations and the observations time series
+        for a given variable.
+
+        :Parameters:
+
+            variable: `str`
+                The model variable to evaluate. It can either be
+                'streamflow' or 'piezo_level'.
+
+            filename: `str`, optional
+                The file name to use for storing the visualisation. The
+                file extension in the name will control the file format
+                generated (e.g. *.pdf, *.png). If not provided, the
+                visualisation is only shown and not saved as a file.
+                
+            fig_size: `tuple`, optional
+                The width and the height of the figure as a tuple.
+                If not provided, set to (10, 4).
+
+        :Returns:
+
+            `None`
+
+        """
         if variable not in ['streamflow', 'piezo_level']:
             raise ValueError(f"{repr(variable)} is not supported")
 
