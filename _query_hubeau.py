@@ -6,13 +6,19 @@ from myhubeau.store import (
 working_dir = 'examples/my-example'
 
 df_streamflow = save_hydrometry(
-    code_station='M107302001', working_dir=working_dir
+    code_station='M107302001', working_dir=working_dir,
+    filename='debit-M107302001.prn',
+    start='1990-01-01', end='2023-12-01'
 )
 
 df_piezo_level = save_piezometry(
-    code_bss='06301X0131/F', working_dir=working_dir
+    code_bss='06301X0131/F', working_dir=working_dir,
+    filename='niveau-06301X0131_F.prn',
+    start='1990-01-01', end='2023-12-01'
 )
 
 df_withdrawal = save_withdrawal(
-    code_ouvrage='OPR0000000003', working_dir=working_dir
+    code_ouvrage='OPR0000000003', working_dir=working_dir,
+    filename='prelevement-OPR0000000003.prn',
+    start='1990-01-01', end='2023-12-01'
 )

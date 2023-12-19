@@ -8,7 +8,8 @@ from .collect import get_meteorology
 
 def save_meteorology(
         latitude: float, longitude: float, working_dir: str,
-        start: str = None, end: str = None, update_era5_land=False
+        filename_prefix: str = None, start: str = None, end: str = None,
+        update_era5_land: bool = False
 ) -> None:
     # collect dataset
     ds = get_meteorology(latitude, longitude, update_era5_land)
@@ -40,13 +41,11 @@ def save_meteorology(
     df = df.reindex(pd.date_range(start, end), fill_value=np.nan)
     df = df.reset_index(names='Date')
 
-    # format date to "Excel date"
-    df['Date'] = df['Date'].dt.strftime('%d/%m/%Y')
-
+    prefix = filename_prefix if filename_prefix else 'my'
     for var in ['Pluie', 'ETP', 'Temperature']:
         df[['Date', var]].to_csv(
             os.sep.join(
-                [working_dir, "data", f"my-{var.lower()}.prn"]
+                [working_dir, "data", f"{prefix}-{var.lower()}.prn"]
             ),
             index=False, sep='\t'
         )

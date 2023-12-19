@@ -8,7 +8,7 @@ from .collect import get_hydrometry, get_piezometry, get_withdrawal
 
 def _save_df_as_prn_file(
         df: pd.DataFrame, working_dir: str, measure_label: str,
-        missing_value: float, start: str = None, end: str = None
+        missing_value: float, filename: str = None,
         start: str = None, end: str = None, freq: str = 'D'
 ):
     # adjust period to match start and end dates if provided
@@ -30,10 +30,13 @@ def _save_df_as_prn_file(
         df.loc[df[measure_label].isna(), measure_label] = missing_value
 
     # save as PRN file
+    filename = (
+        filename if filename else
+        f"my-{measure_label.lower().replace(' ', '-')}.prn"
+    )
     df.to_csv(
         os.sep.join(
-            [working_dir, "data",
-             f"my-{measure_label.lower().replace(' ', '-')}.prn"]
+            [working_dir, "data", filename]
         ),
         index=False, sep='\t'
     )
@@ -41,6 +44,7 @@ def _save_df_as_prn_file(
 
 def save_hydrometry(
         code_station: str, working_dir: str,
+        filename: str = None,
         start: str = None, end: str = None,
         include_realtime: bool = True
 ):
@@ -48,11 +52,14 @@ def save_hydrometry(
     df = get_hydrometry(code_station, include_realtime)
 
     # store as PRN file
-    _save_df_as_prn_file(df, working_dir, 'Debit', -2, start, end)
+    _save_df_as_prn_file(
+        df, working_dir, 'Debit', -2, filename, start, end
+    )
 
 
 def save_piezometry(
         code_bss: str, working_dir: str,
+        filename: str = None,
         start: str = None, end: str = None,
         include_realtime: bool = True
 ):
@@ -60,11 +67,14 @@ def save_piezometry(
     df = get_piezometry(code_bss, include_realtime)
 
     # store as PRN file
-    _save_df_as_prn_file(df, working_dir, 'Niveau', 9999, start, end)
+    _save_df_as_prn_file(
+        df, working_dir, 'Niveau', 9999, filename, start, end
+    )
 
 
 def save_withdrawal(
         code_ouvrage: str, working_dir: str,
+        filename: str = None,
         start: str = None, end: str = None
 ):
     # collect data as dataframe
@@ -85,4 +95,6 @@ def save_withdrawal(
     df[measure_label] = df[measure_label].round(3)
 
     # store as PRN file
-    _save_df_as_prn_file(df, working_dir, measure_label, np.nan, start, end)
+    _save_df_as_prn_file(
+        df, working_dir, measure_label, np.nan, filename, start, end
+    )
