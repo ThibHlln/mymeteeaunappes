@@ -4,8 +4,9 @@ import re
 import glob
 import pandas as pd
 import evalhyd
+from matplotlib import pyplot as plt
 
-from .convert import (
+from ._convert import (
     convert_to_rga_content, convert_to_gar_content
 )
 
@@ -31,9 +32,9 @@ class GardeniaModel(object):
                 silent mode is used.
 
             save_outputs: `str`, optional
-                Whether to save the streamflow and/or piezometric level
-                as separate CSV files. If not provided, they are saved.
-
+                Whether to try to save the streamflow and/or piezometric
+                level as separate CSV files if they are available in
+                Gardenia output files. If not provided, set to True.
 
         :Returns:
 
@@ -151,6 +152,22 @@ class GardeniaModel(object):
                     index=False
                 )
 
+    def _trim_output_of_spin_up(self, df: pd.DataFrame):
+        # retrieve length of spin up run
+        spin_up = (
+            self._tree['basin_settings']['model']
+            ['initialisation']['spinup']['n_years']
+        )
+
+        # subset in time to exclude spin up period
+        df = df[
+            df['dt'] >= (
+                    df['dt'].iloc[0] + pd.offsets.DateOffset(years=spin_up)
+            )
+        ]
+
+        return df
+
     def evaluate(
             self, variable: str, metric: str,
             transform: str = None, exponent: float = None
@@ -188,34 +205,66 @@ class GardeniaModel(object):
         if variable not in ['streamflow', 'piezo_level']:
             raise ValueError(f"{repr(variable)} is not supported")
 
-        if getattr(self, variable) is None:
+        # collect relevant variable
+        df = getattr(self, variable)
+        if df is None:
             raise ValueError(f"{repr(variable)} was not computed")
 
-        spin_up = (
-            self._tree['basin_settings']['model']
-            ['initialisation']['spinup']['n_years']
-        )
+        # subset in time to exclude spin up period
+        df = self._trim_output_of_spin_up(df)
+
+        # returned evaluation metric value
+        prefix = 'river' if variable == 'streamflow' else 'piezo'
+
+        return evalhyd.evald(
+            q_obs=df[f'{prefix}_obs'].values,
+            q_prd=df[f'{prefix}_sim'].values,
+            metrics=[metric],
+            transform=transform, exponent=exponent
+        )[0].squeeze()
+
+    def visualise(
+            self, variable: str, fig_size: tuple = None, filename: str = None
+    ):
+        if variable not in ['streamflow', 'piezo_level']:
+            raise ValueError(f"{repr(variable)} is not supported")
 
         # collect relevant variable
         df = getattr(self, variable)
+        if df is None:
+            raise ValueError(f"{repr(variable)} was not computed")
 
         # subset in time to exclude spin up period
-        df = df[
-            df['dt'] >= (
-                df['dt'].iloc[0] + pd.offsets.DateOffset(years=spin_up)
+        df = self._trim_output_of_spin_up(df)
+
+        # generate plot
+        fig, ax = plt.subplots(
+            figsize=fig_size if fig_size else (10, 4)
+        )
+
+        prefix = 'river' if variable == 'streamflow' else 'piezo'
+
+        ax.plot(
+            df['dt'], df[f'{prefix}_obs'], label='observed',
+            marker='+', markersize=1.5, linestyle='-'
+        )
+        ax.plot(
+            df['dt'], df[f'{prefix}_sim'], label='simulated'
+        )
+
+        ax.set_xlabel('time')
+
+        ax.set_ylabel(
+            r'streamflow [m$^3$.s$^{-1}$]' if variable == 'streamflow'
+            else f'piezometric level [m NGF]'
+        )
+
+        ax.legend(frameon=False)
+
+        # save or show
+        if filename is not None:
+            fig.savefig(
+                os.sep.join([self._working_dir, "output", filename])
             )
-        ]
-
-        # collect observations and predictions as arrays
-        if variable == 'streamflow':
-            obs = df['river_obs'].values
-            prd = df['river_sim'].values
         else:
-            obs = df['piezo_obs'].values
-            prd = df['piezo_sim'].values
-
-        # returned evaluation metric value
-        return evalhyd.evald(
-            q_obs=obs, q_prd=prd, metrics=[metric],
-            transform=transform, exponent=exponent
-        )[0].squeeze()
+            plt.show()

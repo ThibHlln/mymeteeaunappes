@@ -79,10 +79,10 @@ model = GardeniaModel(tree, working_dir)
 # ----------------------------------------------------------------------
 # run gardenia model
 # ----------------------------------------------------------------------
-model.run()
+model.run(execution_mode='M')
 
 # ----------------------------------------------------------------------
-# analyse outputs
+# evaluate gardenia simulations
 # ----------------------------------------------------------------------
 river_nse = model.evaluate(variable='streamflow', metric='NSE')
 river_kge = model.evaluate(variable='streamflow', metric='KGE')
@@ -93,3 +93,10 @@ piezo_nse = model.evaluate(variable='piezo_level', metric='NSE')
 piezo_kge = model.evaluate(variable='piezo_level', metric='KGE')
 
 print('\t'.join(['piezo', f"NSE:{piezo_nse:.2f}", f"KGE:{piezo_kge:.2f}"]))
+
+# ----------------------------------------------------------------------
+# visualise gardenia simulations
+# ----------------------------------------------------------------------
+model.visualise(variable='streamflow', filename='my-streamflow.pdf')
+
+model.visualise(variable='piezo_level', filename='my-piezo-level.pdf')

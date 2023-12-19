@@ -6,6 +6,7 @@ dependencies:
   - pandas
   - toml  # mygardenia
   - evalhyd-python  # mygardenia
+  - matplotlib  # mygardenia
   - requests  # myhubeau
   - cdsapi  # mycds
   - xarray  # mycds
