@@ -140,7 +140,7 @@ def _get_realtime_dataframe(
 
 def _merge_consolidated_and_realtime_dataframe(
         data_cons: (pd.DataFrame | None), data_tr: (pd.DataFrame | None),
-        date_label: str, measure_label: str
+        date_label: str, measure_label: str, date_freq: str = 'D'
 ) -> pd.DataFrame | None:
     if (data_cons is not None) or (data_tr is not None):
         # merge along dates
@@ -170,7 +170,8 @@ def _merge_consolidated_and_realtime_dataframe(
 
         # fill in potentially missing dates
         idx = pd.date_range(
-            data[date_label].iloc[0], data[date_label].iloc[-1]
+            data[date_label].iloc[0], data[date_label].iloc[-1],
+            freq=date_freq
         )
         data = data.set_index(date_label)
         data = data.reindex(idx, fill_value=np.nan)
@@ -525,5 +526,5 @@ def get_withdrawal(code_ouvrage: str) -> pd.DataFrame | None:
 
     # return potentially merged consolidated and/or real-time data
     return _merge_consolidated_and_realtime_dataframe(
-        data_cons, None, date_label, measure_label
+        data_cons, None, date_label, measure_label, date_freq='AS'
     )

@@ -9,6 +9,7 @@ from .collect import get_hydrometry, get_piezometry, get_withdrawal
 def _save_df_as_prn_file(
         df: pd.DataFrame, working_dir: str, measure_label: str,
         missing_value: float, start: str = None, end: str = None
+        start: str = None, end: str = None, freq: str = 'D'
 ):
     # adjust period to match start and end dates if provided
     start = (
@@ -21,15 +22,12 @@ def _save_df_as_prn_file(
     )
 
     df = df.set_index('Date')
-    df = df.reindex(pd.date_range(start, end), fill_value=np.nan)
+    df = df.reindex(pd.date_range(start, end, freq=freq), fill_value=np.nan)
     df = df.reset_index(names='Date')
-
-    # format date to "Excel date"
-    df['Date'] = df['Date'].dt.strftime('%d/%m/%Y')
 
     # fill in missing data with missing value flag
     if df[measure_label].isna().any():
-        df[measure_label][df[measure_label].isna()] = missing_value
+        df.loc[df[measure_label].isna(), measure_label] = missing_value
 
     # save as PRN file
     df.to_csv(
@@ -80,6 +78,7 @@ def save_withdrawal(
     df = df.set_index('Date')
     df = df.resample('D', convention='start').asfreq().ffill()
     df = df / df.groupby(df.index.year).transform(len)
+    df.index = df.index.to_timestamp()
     df = df.reset_index()
 
     # round to 3 decimals
