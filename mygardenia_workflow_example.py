@@ -8,7 +8,6 @@ from mygardenia.simulate import GardeniaModel
 working_dir = 'examples/my-example'
 
 # --- EITHER via TOML files --------------------------------------------
-
 # tree = GardeniaTree(
 #     catchment=f'{working_dir}/config/_my-catchment.toml',
 #     settings=f'{working_dir}/config/_my-settings.toml',
@@ -76,6 +75,8 @@ tree.update(
         }
     }
 )
+
+# ----------------------------------------------------------------------
 
 model = GardeniaModel(tree, working_dir)
 
