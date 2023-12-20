@@ -7,12 +7,15 @@ from mygardenia.simulate import GardeniaModel
 # ----------------------------------------------------------------------
 working_dir = 'examples/my-example'
 
-tree = GardeniaTree()
+# --- EITHER via TOML files --------------------------------------------
 
 # tree = GardeniaTree(
 #     catchment=f'{working_dir}/config/_my-catchment.toml',
 #     settings=f'{working_dir}/config/_my-settings.toml',
 # )
+
+# --- OR via nested dictionary -----------------------------------------
+tree = GardeniaTree()
 
 tree.update(
     {
@@ -84,19 +87,29 @@ model.run(execution_mode='M')
 # ----------------------------------------------------------------------
 # evaluate gardenia simulations
 # ----------------------------------------------------------------------
-river_nse = model.evaluate(variable='streamflow', metric='NSE')
-river_kge = model.evaluate(variable='streamflow', metric='KGE')
+print(
+    '\t'.join(
+        ['river',
+         f"NSE:{model.evaluate(variable='streamflow', metric='NSE'):.2f}",
+         f"KGE:{model.evaluate(variable='streamflow', metric='KGE'):.2f}"]
+    )
+)
 
-print('\t'.join(['river', f"NSE:{river_nse:.2f}", f"KGE:{river_kge:.2f}"]))
-
-piezo_nse = model.evaluate(variable='piezo_level', metric='NSE')
-piezo_kge = model.evaluate(variable='piezo_level', metric='KGE')
-
-print('\t'.join(['piezo', f"NSE:{piezo_nse:.2f}", f"KGE:{piezo_kge:.2f}"]))
+print(
+    '\t'.join(
+        ['piezo',
+         f"NSE:{model.evaluate(variable='piezo_level', metric='NSE'):.2f}",
+         f"KGE:{model.evaluate(variable='piezo_level', metric='KGE'):.2f}"]
+    )
+)
 
 # ----------------------------------------------------------------------
 # visualise gardenia simulations
 # ----------------------------------------------------------------------
-model.visualise(variable='streamflow', filename='my-streamflow.pdf')
+model.visualise(
+    variable='streamflow', filename='my-streamflow.pdf'
+)
 
-model.visualise(variable='piezo_level', filename='my-piezo-level.pdf')
+model.visualise(
+    variable='piezo_level', filename='my-piezo-level.pdf'
+)
