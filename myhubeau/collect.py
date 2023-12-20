@@ -210,7 +210,8 @@ def _set_and_get_hydrometry_stations() -> list:
 def get_hydrometry(
         code_station: str, include_realtime: bool = True
 ) -> pd.DataFrame | None:
-    """Collect observed hydrometric data for a given station.
+    """Collect observed hydrometric data for a given station in cubic
+    metres per second.
 
     :Parameters:
 
@@ -287,10 +288,15 @@ def get_hydrometry(
             extra_parameters={'grandeur_hydro': 'Q'}
         )
 
-    # return potentially aggregated elaborated and/or real-time data
-    return _merge_consolidated_and_realtime_dataframe(
+    # potentially aggregate elaborated and real-time data
+    data_all = _merge_consolidated_and_realtime_dataframe(
         data_cons, data_tr, date_label, measure_label
     )
+
+    # convert [L.s-1] into [m3.s-1]
+    data_all[measure_label] /= 1000
+
+    return data_all
 
 
 # get list of available stations still on operation
@@ -331,7 +337,8 @@ def _set_and_get_piezometry_stations() -> list:
 def get_piezometry(
         code_bss: str, include_realtime: bool = True
 ) -> pd.DataFrame | None:
-    """Collect observed piezometric data for a given station.
+    """Collect observed piezometric data for a given station in metres
+    NGF.
 
     :Parameters:
 
@@ -458,7 +465,8 @@ def _set_and_get_withdrawal_stations() -> list:
 
 
 def get_withdrawal(code_ouvrage: str) -> pd.DataFrame | None:
-    """Collect observed piezometric data for a given station.
+    """Collect observed piezometric data for a given station in cubic
+    metres.
 
     :Parameters:
 
