@@ -181,7 +181,7 @@ def save_piezometry(
     *examples/my_example/data*  containing consolidated and real-time
     daily groundwater level data for the  piezometric station '06301X0131/F':
 
-    >>> save_hydrometry(
+    >>> save_piezometry(
     ...     code_bss='06301X0131/F', working_dir='examples/my_example'
     ... )
     """
@@ -237,7 +237,7 @@ def save_withdrawal(
     *examples/my_example/data* containing consolidated withdrawal data
     for the extraction point 'OPR0000000003':
 
-    >>> save_hydrometry(
+    >>> save_withdrawal(
     ...     code_ouvrage='OPR0000000003', working_dir='examples/my_example'
     ... )
     """
