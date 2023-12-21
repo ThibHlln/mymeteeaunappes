@@ -136,7 +136,8 @@ def save_piezometry(
         code_bss: str, working_dir: str,
         filename: str = None,
         start: str = None, end: str = None,
-        include_realtime: bool = True
+        include_realtime: bool = True,
+        realtime_aggregation_method: str = 'mean'
 ):
     """Generate a PRN file containing the observed piezometric data
     for a given station.
@@ -171,6 +172,12 @@ def save_piezometry(
             aggregate it with consolidated data. If not provided,
             set to default value `True`.
 
+        realtime_aggregation_method: `str`, optional
+            The aggregation method to use to resample hourly data to
+            daily data (e.g. 'mean', 'min', 'max'). This is only relevant
+            when real-time data is considered. If not provided, set to
+            default value 'mean'.
+
     :Returns:
 
         `None`
@@ -186,7 +193,9 @@ def save_piezometry(
     ... )
     """
     # collect data as dataframe
-    df = get_piezometry(code_bss, include_realtime)
+    df = get_piezometry(
+        code_bss, include_realtime, realtime_aggregation_method
+    )
 
     # store as PRN file
     _save_df_as_prn_file(
