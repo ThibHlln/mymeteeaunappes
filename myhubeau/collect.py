@@ -211,8 +211,8 @@ def _set_and_get_hydrometry_stations() -> list:
 def get_hydrometry(
         code_station: str, include_realtime: bool = True
 ) -> pd.DataFrame | None:
-    """Collect observed hydrometric data for a given station in cubic
-    metres per second.
+    """Collect entire record of observed hydrometric data for a given
+    station (in cubic metres per second) from HydroPortail via Hub'Eau.
 
     :Parameters:
 
@@ -339,8 +339,8 @@ def get_piezometry(
         code_bss: str, include_realtime: bool = True,
         realtime_aggregation_method: str = 'mean'
 ) -> pd.DataFrame | None:
-    """Collect observed piezometric data for a given station in metres
-    NGF.
+    """Collect entire record of observed piezometric data for a given
+    station (in metres NGF) from ADES via Hub'Eau.
 
     :Parameters:
 
@@ -474,8 +474,8 @@ def _set_and_get_withdrawal_stations() -> list:
 
 
 def get_withdrawal(code_ouvrage: str) -> pd.DataFrame | None:
-    """Collect observed piezometric data for a given station in cubic
-    metres.
+    """Collect entire record of withdrawal data for a given station
+    (in cubic metres) from BNPE via Hub'Eau.
 
     :Parameters:
 
