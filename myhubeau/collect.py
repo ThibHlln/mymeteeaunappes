@@ -479,7 +479,7 @@ def get_withdrawal(code_ouvrage: str) -> pd.DataFrame | None:
 
     :Parameters:
 
-        code_bss: `str`
+        code_ouvrage: `str`
             The code of the withdrawal point for which extracted water
             volume data is requested from BNPE via Hub'Eau.
 
