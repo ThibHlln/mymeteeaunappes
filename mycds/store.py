@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 import pandas as pd
 import numpy as np
+import xarray as xr
 
 from .collect import get_meteorology
 
@@ -14,18 +15,33 @@ def save_meteorology(
     # collect dataset
     ds = get_meteorology(latitude, longitude, update_era5_land)
 
+    # convert units
+    ds['tp'] = ds['tp'] * 1000  # [m] to [mm]
+    ds['pev'] = ds['pev'] * -1000  # [m] to [mm] + sign change
+    ds['t2m'] = ds['t2m'] - 273.15  # [K] to [degC]
+
+    # drop negative remaining PET negative values
+    ds['pev'] = ds['pev'].where(ds['pev'] >= 0, np.nan)
+
+    # resample hourly to daily values
+    ds = xr.merge(
+        [
+            # total precipitation [tp]
+            ds['tp'].resample(valid_time='1D', origin='end_day').sum(),
+            # potential evaporation [pev]
+            ds['pev'].resample(valid_time='1D', origin='end_day').sum(),
+            # 2m air temperature [t2m]
+            ds['t2m'].resample(valid_time='1D', origin='end_day').mean()
+        ]
+    )
+
     # convert to dataframe
     df = ds.to_dataframe()
     df = df.reset_index()
 
     # keep only time and variables
-    df = df[['time', 'tp', 'pev', 't2m']]
+    df = df[['valid_time', 'tp', 'pev', 't2m']]
     df.columns = ['Date', 'Pluie', 'ETP', 'Temperature']
-
-    # convert units
-    df['Pluie'] *= 1000  # m to mm
-    df['ETP'] *= 1000  # m to mm
-    df['Temperature'] -= 273.15  # K to degC
 
     # adjust period to match start and end dates if provided
     start = (

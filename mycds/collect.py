@@ -54,21 +54,20 @@ def _collect_era5_land(year: float, month: float, filename: str) -> None:
         grib_filename
     )
 
-    # convert to daily values
+    # collapse time and step dimensions into single valid_time dimension
     ds = xr.open_dataset(grib_filename, engine='cfgrib')
-
-    ds = xr.merge(
-        [
-            # total precipitation [tp]
-            ds['tp'].sum('step'),
-            # potential evaporation [pev]
-            ds['pev'].sum('step'),
-            # 2m air temperature [t2m]
-            ds['t2m'].mean('step')
-        ]
+    ds = (
+        ds.stack(datetime=("time", "step"))
+        .reset_index('datetime')
+        .set_index(datetime='valid_time')
+        .rename_dims({"datetime": "valid_time"})
+        .rename_vars({'datetime': 'valid_time'})
     )
 
-    # store as netCDF file
+    # drop 23 first hours and last hour of the month (as they are NaN)
+    ds = ds.isel(valid_time=slice(23, -1))
+
+    # store as netCDF
     ds.to_netcdf(filename)
 
     # remove GRIB file and its index (.idx)
@@ -112,6 +111,7 @@ def get_meteorology(
     if update_era5_land:
         _update_era5_database()
 
+    # gather entire ERA5 record from database as xarray dataset
     files = os.sep.join(
         [os.path.dirname(__file__), "database",
          "reanalysis-era5-land_*.nc"]
@@ -123,4 +123,5 @@ def get_meteorology(
             "ERA5 database is empty, consider updating it"
         )
 
+    # return nearest ERA5 grid box
     return ds.sel(latitude=latitude, longitude=longitude, method='nearest')
