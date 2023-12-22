@@ -184,9 +184,9 @@ def save_piezometry(
 
     **Examples**
 
-    Generating a PRN file named *my-prelevement-.prn* in
-    *examples/my_example/data*  containing consolidated and real-time
-    daily groundwater level data for the  piezometric station '06301X0131/F':
+    Generating a PRN file named *my-niveau.prn* in *examples/my_example/data*
+    containing consolidated and real-time daily groundwater level data for
+    the piezometric station '06301X0131/F':
 
     >>> save_piezometry(
     ...     code_bss='06301X0131/F', working_dir='examples/my_example'
