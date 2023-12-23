@@ -245,6 +245,9 @@ def save_2m_air_temperature(
     # convert [K] to [degC]
     da = da - 273.15
 
+    # aggregate hourly to daily values
+    da = da.resample(valid_time='1D', origin='end_day').mean()
+
     # store as PRN file
     _save_data_as_prn_file(
         da, 't2m', '2m air temperature', working_dir, filename, start, end
