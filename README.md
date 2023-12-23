@@ -12,6 +12,13 @@ This module contains functions that:
 1. download hydrometric/piezometric/withdrawal data via Hub'Eau
 2. save downloaded data as PRN files ready to use by Gardenia
 
+
+## mycds
+
+This module contains functions that:
+1. download ERA5-land meteorological data via Copernicus' Climate Data Store (CDS)
+2. save downloaded data as PRN files ready to use by Gardenia
+
 ## mygardenia
 
 This module contains a wrapper to Gardenia that:
