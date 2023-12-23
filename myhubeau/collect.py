@@ -336,8 +336,7 @@ def _set_and_get_piezometry_stations() -> list:
 
 
 def get_piezometry(
-        code_bss: str, include_realtime: bool = True,
-        realtime_aggregation_method: str = 'mean'
+        code_bss: str, include_realtime: bool = True
 ) -> pd.DataFrame | None:
     """Collect entire record of observed piezometric data for a given
     station (in metres NGF) from ADES via Hub'Eau.
@@ -352,12 +351,6 @@ def get_piezometry(
             Whether to include real-time data (if available) and
             aggregate it with consolidated data. If not provided,
             set to default value `True`.
-
-        realtime_aggregation_method: `str`, optional
-            The aggregation method to use to resample hourly data to
-            daily data (e.g. 'mean', 'min', 'max'). This is only relevant
-            when real-time data is considered. If not provided, set to
-            default value 'mean'.
 
     :Returns:
 
@@ -418,7 +411,7 @@ def get_piezometry(
             date_field='date_mesure', date_format='%Y-%m-%dT%H:%M:%SZ',
             date_label=date_label,
             measure_field='niveau_eau_ngf', measure_label=measure_label,
-            aggregation_method=realtime_aggregation_method
+            aggregation_method='max'
         )
 
     # return potentially merged consolidated and/or real-time data
