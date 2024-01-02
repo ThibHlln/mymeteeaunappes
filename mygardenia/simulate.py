@@ -10,6 +10,8 @@ from matplotlib import pyplot as plt
 from ._convert import (
     convert_to_rga_content, convert_to_gar_content
 )
+from .configure import GardeniaTree
+
 
 def _manage_working_directory(working_dir: str):
     # create working directory and 'config' subdirectory if they do not exist
@@ -31,7 +33,24 @@ def _manage_working_directory(working_dir: str):
 
 class GardeniaModel(object):
 
-    def __init__(self, tree, working_dir):
+    def __init__(self, tree: GardeniaTree, working_dir: str):
+        """Initialise a wrapper for a simulation with the Gardenia model.
+
+        :Parameters:
+
+            tree: `GardeniaTree`
+                The Gardenia tree containing all the settings and parameters
+                to be given to the Gardenia model.
+
+            working_dir: `str`
+                The path to the directory containing the simulation data,
+                the potential configuration files and the future simulation
+                output.
+
+        :Returns:
+
+            `GardeniaModel`
+        """
         self._tree = tree
 
         _manage_working_directory(working_dir)

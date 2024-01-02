@@ -54,9 +54,36 @@ def _rename_branch(branch, dictionary):
 
 class GardeniaTree(collections.abc.Mapping):
     def __init__(self, catchment: str = None, settings: str = None):
+        """Initialise a configuration tree gathering all the settings
+         and parameters for the Gardenia model.
+
+        :Parameters:
+
+            catchment: `str`, optional
+                The path to the TOML file containing the information about
+                the simulation data for the catchment to simulate.
+
+            settings: `str`, optional
+                The path to the TOML file containing the settings and
+                the parameters configuring the simulation with the
+                Gardenia model.
+
+        :Returns:
+
+            `GardeniaTree`
+        """
+
         self._root = _create_branch(
-            toml.load(os.sep.join([os.path.dirname(__file__), "default", "catchment.toml"]))
-            | toml.load(os.sep.join([os.path.dirname(__file__), "default", "settings.toml"]))
+            toml.load(
+                os.sep.join(
+                    [os.path.dirname(__file__), "default", "catchment.toml"]
+                )
+            )
+            | toml.load(
+                os.sep.join(
+                    [os.path.dirname(__file__), "default", "settings.toml"]
+                )
+            )
         )
         if catchment:
             self._root.update(toml.load(catchment))
@@ -78,8 +105,20 @@ class GardeniaTree(collections.abc.Mapping):
     def __iter__(self):
         return iter(self._root)
 
-    def update(self, dictionary: dict):
-        _rename_branch(self._root, dictionary)
+    def update(self, updates: dict):
+        """Update the existing values in the configuration tree.
+
+        :Parameters:
+
+            updates: `dict`
+                The configuration updates to overwrite the existing
+                values contained in the Gardenia tree.
+
+        :Returns:
+
+            `None`
+        """
+        _rename_branch(self._root, updates)
 
 
 class _GardeniaBranch(collections.abc.MutableMapping):
