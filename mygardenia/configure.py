@@ -1,7 +1,6 @@
 import collections.abc
 import toml
 import os
-import warnings
 
 
 def _create_branch(dictionary):
@@ -46,7 +45,7 @@ def _rename_branch(branch, dictionary):
                 )
 
     if keys:
-        warnings.warn(
+        raise KeyError(
             f"settings {repr(tuple(keys))} were not found "
             f"in Gardenia tree"
         )
