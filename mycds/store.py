@@ -1,4 +1,5 @@
 import os
+import pathlib
 from datetime import datetime
 import pandas as pd
 import numpy as np
@@ -9,11 +10,22 @@ from .collect import (
 )
 
 
+def _manage_working_directory(working_dir: str):
+    # create working directory and 'data' subdirectory if they do not exist
+    (
+        pathlib.Path(os.sep.join([working_dir, 'data']))
+        .mkdir(parents=True, exist_ok=True)
+    )
+
+
 def _save_data_as_prn_file(
         da: xr.DataArray, var: str, variable: str,
         working_dir: str, filename: str = None,
         start: str = None, end: str = None
 ) -> None:
+    # deal with working directory
+    _manage_working_directory(working_dir)
+
     # convert to dataframe
     df = da.to_dataframe()
     df = df.reset_index()

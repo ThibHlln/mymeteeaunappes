@@ -1,4 +1,5 @@
 import os
+import pathlib
 import numpy as np
 import pandas as pd
 from datetime import datetime
@@ -6,11 +7,22 @@ from datetime import datetime
 from .collect import get_hydrometry, get_piezometry, get_withdrawal
 
 
+def _manage_working_directory(working_dir: str):
+    # create working directory and 'data' subdirectory if they do not exist
+    (
+        pathlib.Path(os.sep.join([working_dir, 'data']))
+        .mkdir(parents=True, exist_ok=True)
+    )
+
+
 def _save_df_as_prn_file(
         df: pd.DataFrame, working_dir: str, measure_label: str,
         missing_value: float, filename: str = None,
         start: str = None, end: str = None, freq: str = 'D'
-):
+) -> None:
+    # deal with working directory
+    _manage_working_directory(working_dir)
+
     # adjust period to match start and end dates if provided
     start = (
         df['Date'].iloc[0] if (start is None)

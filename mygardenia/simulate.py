@@ -1,5 +1,6 @@
 import subprocess
 import os
+import pathlib
 import re
 import glob
 import pandas as pd
@@ -10,11 +11,30 @@ from ._convert import (
     convert_to_rga_content, convert_to_gar_content
 )
 
+def _manage_working_directory(working_dir: str):
+    # create working directory and 'config' subdirectory if they do not exist
+    (
+        pathlib.Path(os.sep.join([working_dir, 'config']))
+        .mkdir(parents=True, exist_ok=True)
+    )
+    # create working directory and 'data' subdirectory if they do not exist
+    (
+        pathlib.Path(os.sep.join([working_dir, 'data']))
+        .mkdir(parents=True, exist_ok=True)
+    )
+    # create working directory and 'output' subdirectory if they do not exist
+    (
+        pathlib.Path(os.sep.join([working_dir, 'output']))
+        .mkdir(parents=True, exist_ok=True)
+    )
+
 
 class GardeniaModel(object):
 
     def __init__(self, tree, working_dir):
         self._tree = tree
+
+        _manage_working_directory(working_dir)
         self._working_dir = working_dir
 
         self.streamflow = None
