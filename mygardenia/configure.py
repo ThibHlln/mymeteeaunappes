@@ -70,6 +70,21 @@ class GardeniaTree(collections.abc.Mapping):
         :Returns:
 
             `GardeniaTree`
+
+        **Examples**
+
+        Generating a configuration tree with default values:
+
+        >>> t = GardeniaTree()
+
+        Generating a configuration tree with default values except for
+        those settings and parameters whose values are contained in the
+        given TOML files:
+
+        >>> t = GardeniaTree(
+        ...     catchment='examples/my-example/config/bassin.toml',
+        ...     settings='examples/my-example/config/reglages.toml'
+        ... )
         """
 
         self._root = _create_branch(
@@ -116,6 +131,50 @@ class GardeniaTree(collections.abc.Mapping):
         :Returns:
 
             `None`
+
+        **Examples**
+
+        Generating a configuration tree with default values, then
+        updating some of the default values it contains:
+
+        >>> t = GardeniaTree()
+        >>> t.update(
+        ...     {
+        ...         'data': {
+        ...             'simulation': {
+        ...                 'rainfall': 'pluie.prn',
+        ...                 'pet': 'etp.prn'
+        ...             },
+        ...             'observation': {
+        ...                 'streamflow': 'debit.prn',
+        ...                 'piezo-level': 'niveau.prn'
+        ...             }
+        ...         }
+        ...     }
+        ... )
+
+        Generating a configuration tree with default values, then
+        trying to update some of the default values it contains with
+        erroneous dictionary keys:
+
+        >>> t = GardeniaTree()
+        >>> t.update(
+        ...     {
+        ...         'data': {
+        ...             'simulations': {
+        ...                 'rainfall': 'pluie.prn',
+        ...                 'pet': 'etp.prn'
+        ...             },
+        ...             'observations': {
+        ...                 'streamflow': 'debit.prn',
+        ...                 'piezo-level': 'niveau.prn'
+        ...             }
+        ...         }
+        ...     }
+        ... )  # doctest: +ELLIPSIS
+        Traceback (most recent call last):
+            ...
+        KeyError: "settings ('simulations', 'observations') were not found in Gardenia tree"
         """
         _rename_branch(self._root, updates)
 

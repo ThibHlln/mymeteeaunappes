@@ -50,6 +50,11 @@ class GardeniaModel(object):
         :Returns:
 
             `GardeniaModel`
+
+        **Examples**
+
+        >>> t = GardeniaTree()
+        >>> m = GardeniaModel(t, working_dir='examples/my-example')
         """
         self._tree = tree
 
@@ -78,6 +83,15 @@ class GardeniaModel(object):
         :Returns:
 
             `None`
+
+        **Examples**
+
+        >>> t = GardeniaTree(
+        ...     catchment='examples/my-example/config/bassin.toml',
+        ...     settings='examples/my-example/config/reglages.toml'
+        ... )
+        >>> m = GardeniaModel(t, working_dir='examples/my-example')
+        >>> m.run(save_outputs=True)
         """
         separator = '/'
 
@@ -237,9 +251,21 @@ class GardeniaModel(object):
 
         :Returns:
 
-            `float`
-                The value of the evaluation metric.
+            `numpy.ndarray`
+                The array containing the value(s) of the evaluation metric.
 
+        **Examples**
+
+        >>> t = GardeniaTree(
+        ...     catchment='examples/my-example/config/bassin.toml',
+        ...     settings='examples/my-example/config/reglages.toml'
+        ... )
+        >>> m = GardeniaModel(t, working_dir='examples/my-example')
+        >>> m.run(save_outputs=True)
+        >>> m.evaluate('streamflow', 'KGE')
+        array(0.74406113)
+        >>> m.evaluate('piezo_level', 'NSE', transform='sqrt')
+        array(-436.91149994)
         """
         if variable not in ['streamflow', 'piezo_level']:
             raise ValueError(f"{repr(variable)} is not supported")
@@ -288,6 +314,16 @@ class GardeniaModel(object):
 
             `None`
 
+        **Examples**
+
+        >>> t = GardeniaTree(
+        ...     catchment='examples/my-example/config/bassin.toml',
+        ...     settings='examples/my-example/config/reglages.toml'
+        ... )
+        >>> m = GardeniaModel(t, working_dir='examples/my-example')
+        >>> m.run(save_outputs=True)
+        >>> m.visualise('streamflow', filename='my-debit.pdf')
+        >>> m.visualise('piezo_level', filename='my-niveau.png')
         """
         if variable not in ['streamflow', 'piezo_level']:
             raise ValueError(f"{repr(variable)} is not supported")
