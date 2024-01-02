@@ -1,0 +1,32 @@
+Méthode utilisée pour collecter la liste des stations météos temps-réel
+présente dans "database/stations_meteo_publitheque_*.geojson":
+
+1) naviguer sur https://publitheque.meteo.fr/
+
+2) aller dans "Espace de commandes" > "Tout sur les stations météos"
+
+3) cocher un "Département"/"DOM-TOM" :
+
+   - pour "Paramètres mesurés", cocher "Précipitations" ou "Température"
+     ou "ETP quotidienne" et cocher
+
+   - pour "Types de station", cocher "Type 0" et "Type 1" et "Type 2"
+
+4) choisir pour "Rechercher sur":  "le(s) département(s) sélectionné(s) ou DOM-TOM"
+
+5) choisir pour "Période d'ouverture":  "01/12/2023" à "" (laisser champs vide)
+
+6) cliquer sur "Chercher directement les stations météos ..."
+
+7) dans la fenêtre pop-up ouverte, cliquer sur "valider tout"
+
+8) de retour sur la page principale, cliquer sur "Tout sélectionner" puis
+   "Exporter la sélection"
+
+7) dans la fenêtre pop-up ouverte, cliquer sur "Copier dans le presse-papier"
+
+8) coller le contenu dans un fichier CSV
+
+Répéter l'opération pour chaque département et chaque DOM-TOM et concaténer le
+tout dans un unique fichier CSV, puis convertir au format GeoJSON avec QGIS
+par exemple.

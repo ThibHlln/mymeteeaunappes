@@ -6,12 +6,22 @@ MétéEau Nappes.
 Note: within the working directory, the structure must follow the example provided, 
 i.e. three sub-directories *config*, *data*, and *output*.
 
+## mysig
+
+This module contains functions and procedures used to generate 
+a national GIS database of:
+- real-time meteorological stations
+- real-time hydrometric stations
+- real-time piezometric stations
+- surface and groundwater withdrawal points
+
+It also contains this database as a collection of GeoJSON files.
+
 ## myhubeau
 
 This module contains functions that:
 1. download hydrometric/piezometric/withdrawal data via Hub'Eau
 2. save downloaded data as PRN files ready to use by Gardenia
-
 
 ## mycds
 

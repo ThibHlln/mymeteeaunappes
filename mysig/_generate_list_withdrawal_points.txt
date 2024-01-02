@@ -1,0 +1,24 @@
+Méthode utilisée pour collecter la liste des points de prélèvement
+présente dans "database/points_prelevements_bnpe_2008-2021.geojson":
+
+1) naviguer sur https://bnpe.eaufrance.fr//
+
+2) aller dans "Accès aux données" > "Recherche"
+
+3) puis dans "Région", sélectionner une région sur la carte
+
+5) choisir "Tout usage" et "Tout type d'eau"
+
+4) cliquer sur "Exporter"
+
+5) dans la fenêtre pop-up ouverte, choisir la période de 2008 à 2021
+
+6) saisir son adresse courriel
+
+7) cliquer sur exporter
+
+Répéter l'opération pour chaque région et concaténer le tout dans un unique
+fichier CSV, puis éliminer les répétions dans la colonne "Code Sandre de l'ouvrage",
+puis éliminer les colonnes "Année", "Commentaire", "Début", "Fin", "Volume (m3),
+"Mode d'obtention du volume", "Code du statut du volume d'eau", puis convertir
+au format GeoJSON avec QGIS par exemple.
