@@ -172,9 +172,10 @@ def _set_and_get_meteorology_stations(
 
 
 def get_meteorology(
-    variables: list, station_id: int, api_key: str,
-    realtime_only: bool = False, public_only: bool = True,
-    open_only: bool = True
+        variables: list, station_id: int, api_key: str,
+        start: str = None, end: str = None,
+        realtime_only: bool = False, public_only: bool = True,
+        open_only: bool = True
 ):
     # collect list of meteorological stations (if not already collected)
     meteorology_stations = (
@@ -218,6 +219,23 @@ def get_meteorology(
                 - pd.Timedelta(days=2)
             )
 
+    # choose between user-provided period and station period
+    if start:
+        start_date = pd.to_datetime(start)
+        # if sooner than opening date, use opening date instead
+        if start_date < open_date:
+            start_date = open_date
+    else:
+        start_date = open_date
+
+    if end:
+        end_date = pd.to_datetime(end)
+        # if later than closing date, use closing date instead
+        if end_date > close_date:
+            end_date = close_date
+    else:
+        end_date = close_date
+
     # collect data one year at a time
     df = pd.DataFrame(
         {'DATE': pd.Series(dtype='datetime64[ns]')}
@@ -230,15 +248,15 @@ def get_meteorology(
             df,
             _get_dataframe(
                 variables=variables, station_id=station_id,
-                start=open_date.strftime('%Y-%m-%dT%H:%M:%SZ'),
-                end=f'{open_date.year}-12-31T00:00:00Z',
+                start=start_date.strftime('%Y-%m-%dT%H:%M:%SZ'),
+                end=f'{start_date.year}-12-31T00:00:00Z',
                 api_key=api_key
             )
         ]
     )
 
     # years in between
-    for yr in range(open_date.year + 1, close_date.year):
+    for yr in range(start_date.year + 1, end_date.year):
         df = pd.concat(
             [
                 df,
@@ -257,11 +275,11 @@ def get_meteorology(
             df,
             _get_dataframe(
                 variables=variables, station_id=station_id,
-                start=f'{close_date.year}-01-01T00:00:00Z',
-                end=close_date.strftime('%Y-%m-%dT%H:%M:%SZ'),
+                start=f'{end_date.year}-01-01T00:00:00Z',
+                end=end_date.strftime('%Y-%m-%dT%H:%M:%SZ'),
                 api_key=api_key
             )
         ]
     )
 
-    return df.reset_index()
+    return df.reset_index(drop=True)
