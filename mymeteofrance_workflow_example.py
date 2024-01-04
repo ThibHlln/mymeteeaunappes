@@ -1,7 +1,8 @@
+import os
 from mymeteofrance.store import save_meteorology
 
 
-key = 'paste your API key here'
+key = os.environ['MyMeteoFranceAPIKey']
 
 working_dir = 'examples/my-example'
 
