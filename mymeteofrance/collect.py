@@ -177,6 +177,67 @@ def get_meteorology(
         check_station_id: bool = True, realtime_only: bool = False,
         public_only: bool = True, open_only: bool = True
 ):
+    """Collect record of meteorological data for a given MeteoFrance
+    station ID.
+
+    :Parameters:
+
+        variables: `list`
+            The list of variables to collect for the given meteorological
+            station. The following table contains a subset of variables
+            that can be collected via the MeteoFrance API:
+
+            ==========  ========  ======================================
+            variable    unit      description
+            ==========  ========  ======================================
+            RR          mm        daily rainfall depth
+            ETPMON      mm        daily Monteith evapotranspiration
+            TM          °C        mean daily air temperature
+            ==========  ========  ======================================
+
+            A full list of variables available via the MeteoFrance API
+            can be found at: https://donneespubliques.meteofrance.fr/client/
+            document/api_clim_table_parametres_quotidiens_20240103_354.csv.
+
+        station_id: `str`
+            The 8-digit ID for the meteorological station for which data
+            is to be collected.
+
+        api_key: `str`
+            The API key generated on https://portail-api.meteofrance.fr.
+
+        start: `str`, optional
+            The start date to use for the data time series. The date must
+            be specified in a string following the ISO 8601-1:2019 standard,
+            i.e. “YYYY-MM-DD” (e.g. the 21st of May 2007 is “2007-05-21”).
+            If not provided, the earliest date in the available data is used.
+
+        end: `str`, optional
+            The end date to use for the data time series. The date must
+            be specified in a string following the ISO 8601-1:2019 standard,
+            i.e. “YYYY-MM-DD” (e.g. the 21st of May 2007 is “2007-05-21”).
+            If not provided, the latest date in the available data is used.
+
+        check_station_id: `bool`, optional
+            Whether to check if the station ID exists before collecting
+            the data. If not provided, set to default value `True`.
+
+        realtime_only: `bool`, optional
+            Whether to check if the station ID corresponds to a real-time
+            station. If not provided, set to default value `False`. This
+            parameter is only relevant if *check_station_id* is `True`.
+
+        open_only: `bool`, optional
+            Whether to check if the station ID corresponds to a station
+            still in operation. If not provided, set to default value
+            `True`. This parameter is only relevant if *check_station_id*
+            is `True`.
+
+        public_only: `bool`, optional
+            Whether to check if the station ID corresponds to a public
+            station. If not provided, set to default value `True`. This
+            parameter is only relevant if *check_station_id* is `True`.
+    """
     if check_station_id:
         # collect list of meteorological stations (if not already collected)
         meteorology_stations = (
