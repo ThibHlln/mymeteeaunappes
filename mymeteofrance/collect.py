@@ -181,7 +181,7 @@ def get_meteorology(
         _meteorology_stations if _meteorology_stations is not None
         else _set_and_get_meteorology_stations(
             api_key=api_key,
-            station_types=(1, 2, 3) if realtime_only else None,
+            station_types=(0, 1, 2) if realtime_only else None,
             public_stations_only=public_only,
             open_stations_only=open_only
         )
