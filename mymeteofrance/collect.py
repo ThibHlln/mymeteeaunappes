@@ -174,26 +174,27 @@ def _set_and_get_meteorology_stations(
 def get_meteorology(
         variables: list, station_id: int, api_key: str,
         start: str = None, end: str = None,
-        realtime_only: bool = False, public_only: bool = True,
-        open_only: bool = True
+        check_station_id: bool = True, realtime_only: bool = False,
+        public_only: bool = True, open_only: bool = True
 ):
-    # collect list of meteorological stations (if not already collected)
-    meteorology_stations = (
-        _meteorology_stations if _meteorology_stations is not None
-        else _set_and_get_meteorology_stations(
-            api_key=api_key,
-            station_types=(0, 1, 2) if realtime_only else None,
-            public_stations_only=public_only,
-            open_stations_only=open_only
+    if check_station_id:
+        # collect list of meteorological stations (if not already collected)
+        meteorology_stations = (
+            _meteorology_stations if _meteorology_stations is not None
+            else _set_and_get_meteorology_stations(
+                api_key=api_key,
+                station_types=(0, 1, 2) if realtime_only else None,
+                public_stations_only=public_only,
+                open_stations_only=open_only
+            )
         )
-    )
 
-    # check station ID is available
-    if str(station_id) not in meteorology_stations:
-        raise ValueError(
-            f"station ID {repr(station_id)} is not "
-            f"available from MeteoFrance API"
-        )
+        # check station ID is available
+        if str(station_id) not in meteorology_stations:
+            raise ValueError(
+                f"station ID {repr(station_id)} is not "
+                f"available from MeteoFrance API"
+            )
 
     # collect opening (and potentially closing) dates for station
     info = _get_json(
