@@ -237,6 +237,13 @@ def get_meteorology(
             Whether to check if the station ID corresponds to a public
             station. If not provided, set to default value `True`. This
             parameter is only relevant if *check_station_id* is `True`.
+
+    :Returns:
+
+        `pandas.DataFrame` or `None`
+            The dataframe containing the meteorological time series (one
+            column *DATE* plus as many columns as they are *variables*).
+            If no data is available on MeteoFrance, `None` is returned.
     """
     if check_station_id:
         # collect list of meteorological stations (if not already collected)
