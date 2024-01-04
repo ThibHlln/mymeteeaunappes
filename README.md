@@ -21,13 +21,19 @@ It also contains this database as a collection of GeoJSON files.
 
 This module contains functions that:
 1. download hydrometric/piezometric/withdrawal data via Hub'Eau
-2. save downloaded data as PRN files ready to use by Gardenia
+2. save downloaded data as PRN files ready to be used by Gardenia
 
 ## mycds
 
 This module contains functions that:
 1. download ERA5-land meteorological data via Copernicus' Climate Data Store (CDS)
-2. save downloaded data as PRN files ready to use by Gardenia
+2. save downloaded data as PRN files ready to be used by Gardenia
+
+## mymeteofrance
+
+This module contains functions that:
+1. download meteorological data from MeteoFrance API
+2. save downloaded data as PRN files ready to be used by Gardenia
 
 ## mygardenia
 
