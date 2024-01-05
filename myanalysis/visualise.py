@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from ._read import read_prn_file
+
 
 def plot_time_series(
         working_dir: str,
@@ -18,41 +20,29 @@ def plot_time_series(
         plot_filename: str = None
 ) -> None:
     # read in the data time series as dataframes
-    csv_read_params = dict(
-        delimiter='\t', parse_dates=['Date'], date_format='%d/%m/%Y'
-    )
-
     df_rainfall = None
     if rainfall_filename is not None:
-        df_rainfall = pd.read_csv(
-            os.sep.join([working_dir, 'data', rainfall_filename]),
-            **csv_read_params
+        df_rainfall = read_prn_file(
+            working_dir, rainfall_filename, 'Pluie', None
         )
 
     df_pet = None
     if pet_filename is not None:
-        df_pet = pd.read_csv(
-            os.sep.join([working_dir, 'data', pet_filename]),
-            **csv_read_params
+        df_pet = read_prn_file(
+            working_dir, pet_filename, 'ETP', None
         )
 
     df_streamflow = None
     if streamflow_filename is not None:
-        df_streamflow = pd.read_csv(
-            os.sep.join([working_dir, 'data', streamflow_filename]),
-            **csv_read_params
+        df_streamflow = read_prn_file(
+            working_dir, streamflow_filename, 'Debit', -2
         )
-        # deal with missing values
-        df_streamflow.loc[df_streamflow['Debit'] == -2, 'Debit'] = np.nan
 
     df_piezo_level = None
     if piezo_level_filename is not None:
-        df_piezo_level = pd.read_csv(
-            os.sep.join([working_dir, 'data', piezo_level_filename]),
-            **csv_read_params
+        df_piezo_level = read_prn_file(
+            working_dir, piezo_level_filename, 'Niveau', 9999
         )
-        # deal with missing values
-        df_piezo_level.loc[df_piezo_level['Niveau'] == 9999, 'Niveau'] = np.nan
 
     # determine common start and end for time series
     df = (
