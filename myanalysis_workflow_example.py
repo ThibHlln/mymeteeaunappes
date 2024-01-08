@@ -8,13 +8,14 @@ plot_time_series(
     pet_filename='etp.prn',
     streamflow_filename='debit.prn',
     piezo_level_filename='niveau.prn',
-    rainfall_summary='A-JUL', pet_summary='A',
-    plot_filename='test.pdf',
+    plot_filename='my-observations.pdf',
+    rainfall_secondary_frequency='A-JUL',
+    pet_secondary_frequency='A',
     start='1990-01-01', end='2000-01-01'
 )
 
 df = compute_correlation_matrix(
-    correlation_type='pearson',
+    correlation_coefficient='pearson',
     working_dir='examples/my-example',
     rainfall_filename='pluie.prn',
     pet_filename='etp.prn',

@@ -41,13 +41,50 @@ def _calc_r_spearman(a: np.ndarray, b: np.ndarray) -> float:
 
 
 def compute_correlation_matrix(
-    correlation_type: str,
+    correlation_coefficient: str,
     working_dir: str,
     rainfall_filename: str = None,
     pet_filename: str = None,
     streamflow_filename: str = None,
     piezo_level_filename: str = None
 ) -> pd.DataFrame:
+    """Compute the correlation between the given observations time series.
+
+    :Parameters:
+
+        correlation_coefficient: `str`
+            The correlation coefficient to use. It can either be 'pearson'
+             or 'spearman'.
+
+        working_dir: `str`
+            The file path the working directory where the data is stored
+            in the 'data' subdirectory.
+
+        rainfall_filename: `str`, optional
+            The name of the file containing the rainfall data. If not
+            provided, no rainfall data entry will be included in the
+            returned correlation matrix.
+
+        pet_filename: `str`, optional
+            The name of the file containing the potential evapotranspiration
+            data. If not provided, no rainfall data entry will be included
+            in the returned correlation matrix.
+
+        streamflow_filename: `str`, optional
+            The name of the file containing the streamflow data. If not
+            provided, no rainfall data entry will be included in the
+            returned correlation matrix.
+
+        piezo_level_filename: `str`, optional
+            The name of the file containing the piezometric level data.
+            If not provided, no rainfall data entry will be included in
+            the returned correlation matrix.
+
+    :Returns:
+
+        `pd.DataFrame`
+            The dataFrame containing the correlation matrix.
+    """
     # read in the data time series as dataframes
     variables = {}
     if rainfall_filename is not None:
@@ -83,9 +120,9 @@ def compute_correlation_matrix(
             arr_a = variables[a][msk]
             arr_b = variables[b][msk]
 
-            if correlation_type == 'pearson':
+            if correlation_coefficient == 'pearson':
                 corr = _calc_r_pearson(arr_a, arr_b)
-            elif correlation_type == 'spearman':
+            elif correlation_coefficient == 'spearman':
                 corr = _calc_r_spearman(arr_a, arr_b)
             else:
                 raise ValueError('unsupported correlation type')

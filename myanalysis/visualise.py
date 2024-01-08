@@ -1,6 +1,5 @@
 import os
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 
 from ._read import read_prn_file
@@ -12,13 +11,88 @@ def plot_time_series(
         pet_filename: str = None,
         streamflow_filename: str = None,
         piezo_level_filename: str = None,
+        plot_filename: str = None,
         fig_size: tuple = None,
         start: str = None,
         end: str = None,
-        rainfall_summary: str = None,
-        pet_summary: str = None,
-        plot_filename: str = None
+        rainfall_secondary_frequency: str = None,
+        pet_secondary_frequency: str = None
 ) -> None:
+    """Plot the observations time series against one another in a single
+    figure.
+
+    :Parameters:
+
+        working_dir: `str`
+            The file path the working directory where the data is stored
+            in the 'data' subdirectory.
+
+        rainfall_filename: `str`, optional
+            The name of the file containing the rainfall data. If not
+            provided, no rainfall data will be plotted.
+
+        pet_filename: `str`, optional
+            The name of the file containing the potential evapotranspiration
+            data. If not provided, no potential evapotranspiration data
+            will be plotted.
+
+        streamflow_filename: `str`, optional
+            The name of the file containing the streamflow data. If not
+            provided, no streamflow data will be plotted.
+
+        piezo_level_filename: `str`, optional
+            The name of the file containing the piezometric level data.
+            If not provided, no potential evapotranspiration data will
+            be plotted.
+
+        plot_filename: `str`, optional
+            The file name to use for storing the visualisation in the
+            'output' subdirectory. The file extension in the name will
+            control the file format generated (e.g. *.pdf, *.png). If
+            not provided, the visualisation is only shown and not saved
+            as a file.
+
+        fig_size: `tuple`, optional
+            The width and the height of the figure as a tuple.
+            If not provided, set to (10, 4).
+
+        start: `str`, optional
+            The start date to use for the temporal axis of the plot. The
+            date must be specified in a string following the ISO 8601-1:2019
+            standard, i.e. “YYYY-MM-DD” (e.g. the 21st of May 2007 is
+            “2007-05-21”). If not provided, the earliest date in the
+            available data is used.
+
+        end: `str`, optional
+            The end date to use for the temporal axis of the plot. The
+            date must be specified in a string following the ISO 8601-1:2019
+            standard, i.e. “YYYY-MM-DD” (e.g. the 21st of May 2007 is
+            “2007-05-21”). If not provided, the earliest date in the
+            available data is used.
+
+        rainfall_secondary_frequency: `str`, optional
+            Another frequency (in addition to the daily frequency)
+            to display on a secondary axis of the rainfall plot.
+            For example, it can be 'A-JUL' (i.e. annual ending at the
+            end of July = hydrogeological year), 'A-SEP' (i.e. annual
+            ending at the end of September = hydrological year),
+            'A' (i.e. annual = calendar year), 'M' (i.e. monthly), etc.
+            If not provided, no secondary plot is displayed.
+
+        pet_secondary_frequency: `str`, optional
+            Another frequency (in addition to the daily frequency)
+            to display on a secondary axis of the potential evapotranspiration
+            plot. For example, it can be 'A-JUL' (i.e. annual ending at the
+            end of July = hydrogeological year), 'A-SEP' (i.e. annual
+            ending at the end of September = hydrological year),
+            'A' (i.e. annual = calendar year), 'M' (i.e. monthly), etc.
+            If not provided, no secondary plot is displayed.
+
+    :Returns:
+
+        `None`
+    """
+
     # read in the data time series as dataframes
     df_rainfall = None
     if rainfall_filename is not None:
@@ -76,10 +150,10 @@ def plot_time_series(
 
     # plot
     if df_rainfall is not None:
-        if rainfall_summary:
+        if rainfall_secondary_frequency:
             # compute summarised data at given frequency
             df_rainfall_summary = df_rainfall.groupby(
-                pd.Grouper(key='Date', freq=rainfall_summary)
+                pd.Grouper(key='Date', freq=rainfall_secondary_frequency)
             ).sum().reset_index()
 
             ax0b = ax0.twinx()
@@ -145,10 +219,10 @@ def plot_time_series(
     )
 
     if df_pet is not None:
-        if pet_summary:
+        if pet_secondary_frequency:
             # compute summarised data at given frequency
             df_pet_summary = df_pet.groupby(
-                pd.Grouper(key='Date', freq=pet_summary)
+                pd.Grouper(key='Date', freq=pet_secondary_frequency)
             ).sum().reset_index()
 
             ax2b = ax2.twinx()
