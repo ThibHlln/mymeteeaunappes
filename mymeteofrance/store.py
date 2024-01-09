@@ -34,7 +34,7 @@ def _save_df_as_prn_files(
 
     df = df.set_index('DATE')
     df = df.reindex(pd.date_range(start, end, freq=freq), fill_value=np.nan)
-    df = df.reset_index(names='DATE')
+    df = df.reset_index(names='Date')
 
     # save each variable as a PRN file
     for var in variables:
