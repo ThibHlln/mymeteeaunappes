@@ -1,21 +1,26 @@
-[description]
-project = ""
-basin = ""
+# -----------------------------------------------------------------------------
+# DESCRIPTION
+# -----------------------------------------------------------------------------
+description.project = ""
+description.basin = ""
 
-[data]
-# forcings
-simulation.rainfall = ""
-simulation.pet = ""
-simulation.air-temp = ""
-simulation.snowfall = ""
-forecast.rainfall = ""
-forecast.pet = ""
-forecast.air-temp = ""
-forecast.snowfall = ""
+# -----------------------------------------------------------------------------
+# DATA
+# -----------------------------------------------------------------------------
+# simulation forcings
+data.simulation.rainfall = ""
+data.simulation.pet = ""
+data.simulation.air-temp = ""
+data.simulation.snowfall = ""
+# forecast forcings
+data.forecast.rainfall = ""
+data.forecast.pet = ""
+data.forecast.air-temp = ""
+data.forecast.snowfall = ""
 # observations
-observation.streamflow = ""
-observation.piezo-level = ""
+data.observation.streamflow = ""
+data.observation.piezo-level = ""
 # influences
-influence.pumping_or_injection = ""
+data.influence.pumping_or_injection = ""
 # others
-other.weather_tile_weights = ""
+data.other.weather_tile_weights = ""
