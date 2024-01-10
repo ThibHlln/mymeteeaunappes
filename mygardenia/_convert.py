@@ -59,7 +59,7 @@ def convert_to_gar_content(
  {general_settings['pumping_influencing_streamflow']:>9}=Pompage influençant les Débits de Rivière (0=Non ; 1=Oui ; 2=Oui en rivière)
  {general_settings['pumping_influencing_piezo-level']:>9}=Pompage influençant les Niveaux de Nappe (0=Non ; 1=Oui)
  {general_settings['forecast_run']:>9}=Calcul avec Prévision (0=Non ; 1=Oui ; -1=Préparation uniquement) [3, 4 = Particulier]
- {general_settings['forecast_method']:>9}=Méthode de Prévision (0=Ajustement Réservoirs ; 1=Décalage simple ; 2=Décalage avec 1/2 vie)
+ {general_settings['forecast_method']:>9}=Méthode de Prévision (0=Ajustement Réservoirs ; 1=Décalage avec 1/2 vie)
  {general_settings['underground_exchange_scheme']:>9}=Schéma d'échanges souterr. avec extérieur (0=% Débit Souterr. (++) ; 1=Facteur Niv_Souterr.)
  {general_settings['daily_summary']:>9}=Bilan journalier même si pluie Décadaire ou Mensuelle (0=Non ; 1=Oui)
  {general_settings['consider_snow']:>9}=Prise en compte de la Neige (0=Non  ;  1=Oui)

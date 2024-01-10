@@ -51,11 +51,11 @@ verbose = "0"
 # Schéma de calcul (0=Gardénia ; 5=Ruissell,Drainage ; etc.)
 computation_scheme = "0"
 # Dessin de la série simulée (0=non ; 1=Oui ; 2=Oui avec décomposition)
-draw_series = "2"
-# Pondération pour calibration (0=Non ; 2= ++Étiages ; 99= Racine_Débit; 97= Logar_Débits)
+draw_series = "1"
+# Transformation du débit pour calibration (0=Non ; 99= Racine_Débit; 97= Logar_Débits ; etc.)
 transform_calibration_data = "0"
-# Minimisation du biais de simulation des Débits Rivière (0 = Non ; 100 = 100 %)
-minimise_streamflow_bias = false
+# Poids (%) de minimisation du biais de simulation des Débits Rivière (0 = Non ; 100 = 100 %)
+minimise_streamflow_bias = 0
 # Pompage influençant les Débits de Rivière (0=Non ; 1=Oui ; 2=Oui en rivière)
 pumping_influencing_streamflow = "0"
 # Pompage influençant les Niveaux de Nappe (0=Non ; 1=Oui)
@@ -63,7 +63,7 @@ pumping_influencing_piezo-level = "0"
 
 # Calcul avec Prévision (0=Non ; 1=Oui ; -1=Préparation uniquement) [3, 4 = Particulier]
 forecast_run = false
-# Méthode de Prévision (0=Ajustement Réservoirs ; 1=Décalage simple ; 2=Décalage avec 1/2 vie)
+# Méthode de Prévision (0=Ajustement Réservoirs ; 1=Décalage avec 1/2 vie)
 forecast_method = "0"
 
 # Schéma d'échanges souterr. avec extérieur (0=% Débit Souterr. (++) ; 1=Facteur Niv_Souterr.)
@@ -78,7 +78,7 @@ consider_snow = false
 snowfall_in_file = "0"
 
 # Données par années hydrologiques [début 1 août] (0=années Civiles ; 1=années Hydrologiques)
-data_per_hydro_year = false
+data_per_hydro_year = "0"
 
 # Perte de Débit : 0=Non ; 1=Perd le Debit Souterrain le plus Lent ; -1=Perd le Ruissellement
 streamflow_loss = "0"
@@ -126,7 +126,7 @@ observed_streamflow_to_consider = {min=0.0, max=0.0}
 # Valeur Minimale/Maximale du Niveau de Nappe Observé prise en compte (0 = toutes)
 observed_piezo-level_to_consider = {min=0.0, max=0.0}
 
-# Débit Rivière réservé (valeur minimale possible pour les débits simulés) (Déf=0)
+# Débit Rivière réservé (valeur simulée minimale possible) (Déf=0)
 simulated_streamflow_lower_limit_to_apply = 0.0
 
 [forecast_settings]
@@ -171,9 +171,9 @@ time.rainfall_mean_duration_within_timestep = 0
 
 # Nombre d'années de données du fichier de pluies etc. pour la prévision
 time.forecast.n_years_in_data = 0
-# Date de la première année des fichiers météo de prévision [si journalier ou horaire] (déf = 0)
+# Date de la Première Année des fichiers météo de prévision [si journalier] (déf = 0)
 time.forecast.first_year = 0
-# Numéro du mois [si journalier, horaire ou mensuel] (ou n° du pas de temps) d'émiss. de la prévision
+# Numéro du mois [si journalier ou mensuel] (ou n° du pas de temps) d'émission de la prévision
 time.forecast.issue_month = 0
 # Jour d'émission de la prévision (1-31) si pas de temps journalier (sinon : 0)
 time.forecast.issue_day = 0
@@ -192,20 +192,20 @@ time.delay_in_streamflow_piezo-level_data = 0
 # État initial : 0=Pluie Efficace moyenne ; -1=Réservoirs vides ; -2=RuMax vide aussi
 model.initialisation.antecedent_conditions = 0
 
-# Nombre d'années démarrage (-n pour générer n année moyennes fictives de démarrage)
+# Nombre d'années démarrage (-n pour générer n année moyenne fictive de démarrage)
 model.initialisation.spinup.n_years = 0
 # Nombre de cycles de démarrage (déf. = 1)
 model.initialisation.spinup.n_cycles = 1
 
 # Nombre d'années finales à ignorer pour la calibration (déf = 0) [< 0 => n° de la dernière année]
 model.calibration.n_tail_years_to_trim = 0
-# Nombre maximum d'itérations pour la calibration (0 => Aucune itération, pas de calibration)
+# Nombre maximum d'itérations pour la calibration (0 = aucune itération, pas de calibration)
 model.calibration.max_iterations = 450
 
 # Nombre de réservoirs souterrains (1 ou 2 ou -1=Réservoir double avec seuil)   [déf = 1]
 model.structure.n_groundwater_reservoirs = 1
 # Numéro du réservoir souterrain <=> Niveau nappe (si 2 réservoirs souterrains) [déf = 1]
-model.structure.groundwater_reservoir_for_piezo-level = 1
+model.structure.groundwater_reservoir_for_piezo-level = 0
 
 # Perte du débit de Ruissellement par Débordement au-dessus du Seuil [0=Non ; 1=Perte ; 2 => Rés Sout]
 model.structure.intermediate_runoff_by_overspill = 0
@@ -240,7 +240,7 @@ intermediate_runoff_seepage = {val=50.0, opt=true, min=1.0, max=9999.0}
 # Temps de 1/2 percolation vers la nappe          (mois)   [THG]
 intermediate_half-life_seepage = {val=0.5, opt=true, min=0.05, max=10.0}
 # Temps de 1/2 tarissement du débit souterr. n°1  (mois)   [TG1]
-groundwater_1_drainage = {val=0.0, opt=true, min=0.05, max=15.0}
+groundwater_1_drainage = {val=3.0, opt=true, min=0.05, max=15.0}
 # Temps de 1/2 transfert vers la nappe profonde   (mois)   [TG12]
 groundwater_1_2_exchange = {val=0.0, opt=false, min=0.05, max=50.0}
 # Seuil d'écoulement souterrain n°1 (rés. double)   (mm)   [SEUIL]
@@ -275,9 +275,9 @@ air-temp_correction = {val=0.0, opt=false, min=-3.0, max=3.0}
 # Taux de rétention de la neige                      (%)
 snowfall_retention_factor = {val=0.0, opt=false, min=0.001, max=30.0}
 # Facteur d'évaporation de la neige                  (%)
-snow_evaporation_factor = {val=0.0, opt=false, min=0.0, max=20.0}
+snow_evaporation_factor = {val=0.0, opt=false, min=-20.0, max=20.0}
 # Correction de fonte de la neige par la pluie       (%)
-snow_melt_correction_with_rainfall = {val=0.0, opt=false, min=0.0, max=20.0}
+snow_melt_correction_with_rainfall = {val=0.0, opt=false, min=-20.0, max=20.0}
 # Température seuil de fonte naturelle de la neige  (°C)
 natural_snow_melting_threshold = {val=0.0, opt=false, min=-2.0, max=2.0}
 # Constante de fonte par la température     (mm/°C/jour)
@@ -288,12 +288,12 @@ snow_melting_in_contact_with_soil = {val=0.0, opt=false, min=0.001, max=20.0}
 # Coefficient d'influence du pompage => Débit Rivière (-)
 pumping_river_influence_factor = {val=1.0, opt=false}
 # Temps de 1/2 montée du pompage infl. => Rivière  (mois)
-pumping_river_half-life_rise = {val=0.0, opt=false, min=0.05, max=10.0}
+pumping_river_half-life_rise = {val=0.5, opt=false, min=0.05, max=10.0}
 # Temps de 1/2 stabilisation du pompage => Rivière (mois)
-pumping_river_half-life_fall = {val=0.0, opt=false, min=0.05, max=15.0}
+pumping_river_half-life_fall = {val=2.0, opt=false, min=0.05, max=15.0}
 # Coefficient d'influence du pompage => Niveau Nappe  (-)
 pumping_groundwater_influence_factor = {val=1.0, opt=false}
 # Temps de 1/2 montée du pompage infl. => Nappe    (mois)
-pumping_groundwater_half-life_rise = {val=0.0, opt=false, min=0.05, max=10.0}
+pumping_groundwater_half-life_rise = {val=0.5, opt=false, min=0.05, max=10.0}
 # Temps de 1/2 stabilisation du pompage => Nappe   (mois)
-pumping_groundwater_half-life_fall = {val=0.0, opt=false, min=0.05, max=15.0}
+pumping_groundwater_half-life_fall = {val=2.0, opt=false, min=0.05, max=15.0}
