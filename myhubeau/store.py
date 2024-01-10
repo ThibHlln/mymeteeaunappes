@@ -37,6 +37,9 @@ def _save_df_as_prn_file(
     df = df.reindex(pd.date_range(start, end, freq=freq), fill_value=np.nan)
     df = df.reset_index(names='Date')
 
+    # convert to "excel" date for Gardenia
+    df['Date'] = df['Date'].dt.strftime('%d/%m/%Y')
+
     # fill in missing data with missing value flag
     if df[measure_label].isna().any():
         df.loc[df[measure_label].isna(), measure_label] = missing_value

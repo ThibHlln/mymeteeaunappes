@@ -48,6 +48,9 @@ def _save_data_as_prn_file(
     df = df.reindex(pd.date_range(start, end), fill_value=np.nan)
     df = df.reset_index(names='Date')
 
+    # convert to "excel" date for Gardenia
+    df['Date'] = df['Date'].dt.strftime('%d/%m/%Y')
+
     filename = (
         filename if filename
         else f"my-{variable.lower().replace(' ', '-')}.prn"
