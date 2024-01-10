@@ -156,7 +156,7 @@ forecast_settings.half-life_fall_streamflow_forecast = 0.0
 forecast_settings.half-life_fall_piezo-level_forecast = 0.0
 
 # -----------------------------------------------------------------------------
-# BASSIN SETTINGS
+# BASIN SETTINGS
 # -----------------------------------------------------------------------------
 # Position des Données du bassin > N° de la 'colonne' des données : (-1 => N° d'ordre du bassin) Déf=0 <=> Col. n°1
 basin_settings.data.basin_column_number_in_data = 0
