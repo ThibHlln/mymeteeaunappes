@@ -12,6 +12,10 @@ def plot_time_series(
         streamflow_filename: str = None,
         piezo_level_filename: str = None,
         plot_filename: str = None,
+        rainfall_info: str = None,
+        pet_info: str = None,
+        streamflow_info: str = None,
+        piezo_level_info: str = None,
         fig_size: tuple = None,
         start: str = None,
         end: str = None,
@@ -51,6 +55,28 @@ def plot_time_series(
             control the file format generated (e.g. *.pdf, *.png). If
             not provided, the visualisation is only shown and not saved
             as a file.
+
+        rainfall_info: `str`, optional
+            Information specific about the rainfall data to display
+            as comment at the top of the plot. If not provided,
+            nothing is displayed for the rainfall data.
+
+        pet_info: `str`, optional
+            Information specific about the potential evapotranspiration
+            data to display as comment at the top of the plot. If not
+            provided, nothing is displayed for the potential
+            evapotranspiration data.
+
+        streamflow_info: `str`, optional
+            Information specific about the streamflow data to display
+            as comment at the top of the plot. If not provided,
+            nothing is displayed for the streamflow data.
+
+        piezo_level_info: `str`, optional
+            Information specific about the piezometric level data
+            to display as comment at the top of the plot. If not
+            provided, nothing is displayed for the potential
+            evapotranspiration data.
 
         fig_size: `tuple`, optional
             The width and the height of the figure as a tuple.
@@ -253,6 +279,21 @@ def plot_time_series(
         )
     ax2.set_xlim(start, end)
     ax2.set_ylabel('ETP\n[mm]', color='tab:pink')
+
+    # optionally add supplementary information about data
+    fig.suptitle(
+        "; ".join(
+            [
+                f"{v}: {i}" for v, i in {
+                    'Pluie': rainfall_info,
+                    'ETP': pet_info,
+                    'Débit': streamflow_info,
+                    'Niveau': piezo_level_info,
+                }.items() if i is not None
+            ]
+        ),
+        fontsize='medium', fontstyle='italic'
+    )
 
     # save or show
     if plot_filename is not None:
