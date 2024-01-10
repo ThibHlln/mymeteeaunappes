@@ -6,6 +6,14 @@ import pandas as pd
 from .collect import get_meteorology
 
 
+_variable_mapping = {
+    'RR': 'Pluie',
+    'ETPMON': 'ETP',
+    'ETPMONGRILLE': 'ETP',
+    'TM': 'Temperature'
+}
+
+
 def _manage_working_directory(working_dir: str):
     # create working directory and 'data' subdirectory if they do not exist
     (
@@ -38,7 +46,12 @@ def _save_df_as_prn_files(
 
     # save each variable as a PRN file
     for var in variables:
-        df[['DATE', var]].to_csv(
+        # try renaming variable to plain text
+        v = _variable_mapping.get(var, var)
+        df = df.rename(columns={var: v})
+
+        # save to PRN file
+        df[['Date', v]].to_csv(
             os.sep.join(
                 [
                     working_dir, "data",
