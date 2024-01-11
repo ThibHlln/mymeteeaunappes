@@ -214,7 +214,6 @@ def plot_time_series(
     ax0.invert_yaxis()
     ax0.set_xlim(start, end)
     ax0.set_ylabel('Pluie\n[mm]', color='tab:cyan')
-    ax0.set_xticklabels([])
 
     if df_streamflow is not None:
         df_streamflow = (
@@ -226,7 +225,6 @@ def plot_time_series(
         )
     ax1.set_xlim(start, end)
     ax1.set_ylabel('Débit\n[m$^{3}$.s$^{-1}$]', color='tab:blue')
-    ax1.set_xticklabels([])
 
     ax1b = ax1.twinx()
     if df_piezo_level is not None:
