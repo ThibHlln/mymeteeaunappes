@@ -61,7 +61,8 @@ def save_hydrometry(
         code_station: str, working_dir: str,
         filename: str = None,
         start: str = None, end: str = None,
-        include_realtime: bool = True
+        include_realtime: bool = True,
+        keep_quality_values: list = None
 ):
     """Generate a PRN file containing the observed hydrometric data
     for a given station.
@@ -95,6 +96,12 @@ def save_hydrometry(
             Whether to include real-time data (if available) and
             aggregate it with consolidated data. If not provided,
             set to default value `True`.
+
+        keep_quality_values: `bool`, optional
+            The list of quality values in the field *code_qualification*
+            where to keep the time steps. Relevant values are `12` ("dubious"),
+            `16` ("correct"), and `20` ("good") .If not provided, quality values
+            `16` and `20` are kept.
 
     :Returns:
 
@@ -139,7 +146,7 @@ def save_hydrometry(
     ... )
     """
     # collect data as dataframe
-    df = get_hydrometry(code_station, include_realtime)
+    df = get_hydrometry(code_station, include_realtime, keep_quality_values)
 
     # store as PRN file
     _save_df_as_prn_file(

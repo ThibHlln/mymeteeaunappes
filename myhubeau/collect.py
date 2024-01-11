@@ -209,7 +209,8 @@ def _set_and_get_hydrometry_stations() -> list:
 
 
 def get_hydrometry(
-        code_station: str, include_realtime: bool = True
+        code_station: str, include_realtime: bool = True,
+        keep_quality_values: list = None
 ) -> pd.DataFrame | None:
     """Collect entire record of observed hydrometric data for a given
     station (in cubic metres per second) from HydroPortail via Hub'Eau.
@@ -224,6 +225,12 @@ def get_hydrometry(
             Whether to include real-time data (if available) and
             aggregate it with consolidated data. If not provided,
             set to default value `True`.
+
+        keep_quality_values: `bool`, optional
+            The list of quality values in the field *code_qualification*
+            where to keep the time steps. Relevant values are `12` ("dubious"),
+            `16` ("correct"), and `20` ("good") .If not provided, quality
+            values `16` and `20` are kept.
 
     :Returns:
 
@@ -272,7 +279,10 @@ def get_hydrometry(
         date_field='date_obs_elab', date_format='%Y-%m-%d',
         date_label=date_label,
         measure_field='resultat_obs_elab', measure_label=measure_label,
-        quality_field='code_qualification', good_quality_values=[16, 20],
+        quality_field='code_qualification',
+        good_quality_values=(
+            keep_quality_values if keep_quality_values else [16, 20]
+        ),
         extra_parameters={'grandeur_hydro_elab': 'QmJ'}
     )
 
