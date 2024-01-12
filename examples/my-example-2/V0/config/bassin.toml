@@ -1,0 +1,26 @@
+# -----------------------------------------------------------------------------
+# DESCRIPTION
+# -----------------------------------------------------------------------------
+description.project = ""
+description.basin = ""
+
+# -----------------------------------------------------------------------------
+# DATA
+# -----------------------------------------------------------------------------
+# simulation forcings
+data.simulation.rainfall = "pluie.prn"
+data.simulation.pet = "etp.prn"
+data.simulation.air-temp = ""
+data.simulation.snowfall = ""
+# forecast forcings
+data.forecast.rainfall = ""
+data.forecast.pet = ""
+data.forecast.air-temp = ""
+data.forecast.snowfall = ""
+# observations
+data.observation.streamflow = "debit.prn"
+data.observation.piezo-level = "niveau.prn"
+# influences
+data.influence.pumping_or_injection = ""
+# others
+data.other.weather_tile_weights = ""

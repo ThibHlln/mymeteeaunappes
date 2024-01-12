@@ -1,0 +1,227 @@
+# -----------------------------------------------------------------------------
+# TIME
+# -----------------------------------------------------------------------------
+# Pas de temps :  0=Journalier 1=Pentadaire 2=Décadaire 3=Mensuel 4=Autre 5=5_Jours 7=7_Jours
+time.rainfall_snowfall_pumping_timestep = "0"
+time.pet_timestep = "0"
+# Format : 0=Gardénia_Sequentiel  1=Gardénia_Annuaire  2=Libre  3=Excel
+time.rainfall_snowfall_pumping_format = "3"
+time.pet_format = "3"
+
+# -----------------------------------------------------------------------------
+# GENERAL SETTINGS
+# -----------------------------------------------------------------------------
+# Type de donnée pour Prévision (0=Débits de Rivière , 1=Niveaux de Nappe)
+general_settings.forecast_data_type = "0"
+
+# Observations de Débits de Rivière : Importance (entier : 0 à 10 ;  0=Non)
+general_settings.streamflow_obs_weight = 5
+# Observations de Niveaux de Nappe  : Importance (entier : 0 à 10 ;  0=Non)
+general_settings.piezo-level_obs_weight = 2
+# Calcul des Débits de Rivière : (0=Non  ;  1=Oui)
+general_settings.calc_streamflow = true
+# Calcul des Niveaux de Nappe  : (0=Non  ;  1=Oui)
+general_settings.calc_piezo-level = true
+
+# Sauvegarde de la Recharge et de la Pluie Efficace (0=Non  ;  1=Oui)
+general_settings.save_recharge_effective-rainfall = false
+# Sauvegarde des Débit/Niveaux simulés : (0=Non  ;  1=Oui)
+general_settings.save_streamflow_piezo-level = true
+# Sauvegarde des termes du Bilan : (0=Non ; 1=Annuel ; 2=Mensuel ; 3=Tous les pas de temps)
+general_settings.save_water-balance = "2"
+# Sauvegarde de la 'Réponse impulsionnelle' et de la 'Réponse Cumulée' (1=Oui)
+general_settings.save_impulse_and_cumulative_response = false
+
+# Schéma de calcul (0=Gardénia ; 5=Ruissell,Drainage ; etc.)
+general_settings.computation_scheme = "0"
+# Transformation du débit pour calibration (0=Non ; 99= Racine_Débit; 97= Logar_Débits ; etc.)
+general_settings.transform_calibration_data = "0"
+
+# Calcul avec Prévision (0=Non ; 1=Oui ; -1=Préparation uniquement) [3, 4 = Particulier]
+general_settings.forecast_run = false
+# Méthode de Prévision (0=Ajustement Réservoirs ; 1=Décalage avec 1/2 vie)
+general_settings.forecast_method = "0"
+
+# Schéma d'échanges souterr. avec extérieur (0=% Débit Souterr. (++) ; 1=Facteur Niv_Souterr.)
+general_settings.underground_exchange_scheme = "0"
+
+# Prise en compte de la Neige (0=Non  ;  1=Oui)
+general_settings.consider_snow = false
+# Précipitations neigeuses dans un fichier propre (0 = avec pluies ; 1 = fichier séparé)
+general_settings.snowfall_in_file = "0"
+
+# Données par années hydrologiques [début 1 août] (0=années Civiles ; 1=années Hydrologiques)
+general_settings.data_per_hydro_year = "0"
+
+# Perte de Débit : 0=Non ; 1=Perd le Debit Souterrain le plus Lent ; -1=Perd le Ruissellement
+general_settings.streamflow_loss = "0"
+
+# -----------------------------------------------------------------------------
+# FILTER SETTINGS
+# -----------------------------------------------------------------------------
+# Valeur Minimale/Maximale du Débit de Rivière Observé prise en compte (0 = toutes)
+filter_settings.observed_streamflow_to_consider = {min=0.0, max=0.0}
+
+# Valeur Minimale/Maximale du Niveau de Nappe Observé prise en compte (0 = toutes)
+filter_settings.observed_piezo-level_to_consider = {min=0.0, max=0.0}
+
+# Débit Rivière réservé (valeur simulée minimale possible) (Déf=0)
+filter_settings.simulated_streamflow_lower_limit_to_apply = 0.0
+
+# -----------------------------------------------------------------------------
+# FORECAST SETTINGS
+# -----------------------------------------------------------------------------
+# Coefficient de réajustement pour la prévision [0 à 1]
+forecast_settings.readjustment_factor = 0.0
+
+# Écart-type de l'alimentation du Réservoir intermédiaire  (pour la prévision)
+forecast_settings.standard_deviation_of_intermediate_reservoir = 0.0
+# Écart-type de l'alimentation du Réservoir Souterrain n°1 (pour la prévision)
+forecast_settings.standard_deviation_of_groundwater_reservoir_1 = 0.0
+# Écart-type de l'alimentation du Réservoir Souterrain n°2 (pour la prévision)
+forecast_settings.standard_deviation_of_groundwater_reservoir_2 = 0.0
+
+# Écart-type des observations de niveau de nappe (pour la prévision)
+forecast_settings.standard_deviation_of_observed_piezo-level = 0.0
+# Temps de 1/2 vie de l'écart de prévision de Débit de rivière  (pas de temps)
+forecast_settings.half-life_fall_streamflow_forecast = 0.0
+# Temps de 1/2 vie de l'écart de prévision de Niveau de Nappe   (pas de temps)
+forecast_settings.half-life_fall_piezo-level_forecast = 0.0
+
+# -----------------------------------------------------------------------------
+# BASIN SETTINGS
+# -----------------------------------------------------------------------------
+# Nombre d'années des séries de données (Pluie, ETP, Observations) [0 => Toutes]
+basin_settings.time.simulation.n_years_in_data = 0
+# Date de la première année des données (par ex. 2017)
+basin_settings.time.simulation.first_year = 1985
+# Numéro du Mois initial [Déf=1] (si durée non-standard) ; ex. 12 pour décembre
+basin_settings.time.simulation.first_month = 0
+# Numéro du Jour initial [Déf=1] (si durée non-standard) ; ex. 31 pour 31 (décembre)
+basin_settings.time.simulation.first_day = 0
+
+# Nombre d'années de données du fichier de pluies etc. pour la prévision
+basin_settings.time.forecast.n_years_in_data = 0
+# Date de la Première Année des fichiers météo de prévision [si journalier] (déf = 0)
+basin_settings.time.forecast.first_year = 1985
+# Numéro du mois [si journalier ou mensuel] (ou n° du pas de temps) d'émission de la prévision
+basin_settings.time.forecast.issue_month = 0
+# Jour d'émission de la prévision (1-31) si pas de temps journalier (sinon : 0)
+basin_settings.time.forecast.issue_day = 0
+
+# Portée de la prévision (en nombre de pas de temps de prévision)
+basin_settings.time.forecast.span = 90
+
+# Numéro de l'année utilisée pour les pompages pendant la prévision (ex. 2019) Déf 0 => Avant-dernière
+basin_settings.time.forecast.pumping_year = 0
+
+# État initial : 0=Pluie Efficace moyenne ; -1=Réservoirs vides ; -2=RuMax vide aussi
+basin_settings.model.initialisation.antecedent_conditions = 0
+
+# Nombre d'années démarrage (-n pour générer n année moyenne fictive de démarrage)
+basin_settings.model.initialisation.spinup.n_years = 4
+# Nombre de cycles de démarrage (déf. = 1)
+basin_settings.model.initialisation.spinup.n_cycles = 1
+
+# Nombre d'années finales à ignorer pour la calibration (déf = 0) [< 0 => n° de la dernière année]
+basin_settings.model.calibration.n_tail_years_to_trim = 0
+# Nombre maximum d'itérations pour la calibration (0 = aucune itération, pas de calibration)
+basin_settings.model.calibration.max_iterations = 450
+
+# Nombre de réservoirs souterrains (1 ou 2 ou -1=Réservoir double avec seuil)   [déf = 1]
+basin_settings.model.structure.n_groundwater_reservoirs = 1
+# Numéro du réservoir souterrain <=> Niveau nappe (si 2 réservoirs souterrains) [déf = 1]
+basin_settings.model.structure.groundwater_reservoir_for_piezo-level = 1
+
+# Perte du débit de Ruissellement par Débordement au-dessus du Seuil [0=Non ; 1=Perte ; 2 => Rés Sout]
+basin_settings.model.structure.intermediate_runoff_by_overspill = "0"
+# Décroissance de l'évapotranspiration si saturation du réservoir sol < 50% (0=Non ; 1=Oui)
+basin_settings.model.structure.intermediate_reservoir_evapotranspiration_decrease_only_when_half_empty = false
+# Schéma à taux de ruissellement constant (pour comparaison uniquement ; déconseillé) (0=Non ; 1=Oui)
+basin_settings.model.structure.constant_runoff_ratio_scheme = false
+# Méthode de calcul du coefficient d'Emmagasinement [0 = Corrélation ; 1 = Optimisation entre bornes]
+basin_settings.model.structure.storage_coefficient_computation_scheme = "0"
+
+# -----------------------------------------------------------------------------
+# PHYSICAL PARAMETERS
+# -----------------------------------------------------------------------------
+# Pluie Eff. annuelle pour initialis. (0=équil.) (mm/an)
+physical_parameters.annual_effective-rainfall = {val=0.0}
+# Débit extérieur éventuel                        (m3/s)
+physical_parameters.external_flow = {val=0.0, opt=false}
+# Superficie du bassin versant                     (km2)
+physical_parameters.basin_area = {val=524.0, opt=false}
+
+# Correction globale des Pluies                      (%)
+physical_parameters.rainfall_correction = {val=0.0, opt=false, min=-10.0, max=10.0}
+# Correction globale de l'ETP                        (%)
+physical_parameters.pet_correction = {val=0.0, opt=false, min=-15.0, max=15.0}
+# Facteur de correction de la superficie du bassin   (-)
+physical_parameters.basin_area_correction = {val=1.0, opt=false, min=0.02, max=50.0}
+
+# Capacité du réservoir sol 'réserve utile'         (mm)   [RUMAX]
+physical_parameters.thornthewaite_reservoir_capacity = {val=0.0, opt=false, min=0.0, max=500.0}
+# Capacité du réservoir sol progressif              (mm)   [Sx]
+physical_parameters.progressive_reservoir_capacity = {val=150.0, opt=true, min=0.0, max=650.0}
+# Hauteur de répartition Ruissellement-Percolation  (mm)   [RUIPER]
+physical_parameters.intermediate_runoff_seepage = {val=50.0, opt=true, min=1.0, max=9999.0}
+# Temps de 1/2 percolation vers la nappe          (mois)   [THG]
+physical_parameters.intermediate_half-life_seepage = {val=0.5, opt=true, min=0.05, max=10.0}
+# Temps de 1/2 tarissement du débit souterr. n°1  (mois)   [TG1]
+physical_parameters.groundwater_1_drainage = {val=3.0, opt=true, min=0.05, max=15.0}
+# Temps de 1/2 transfert vers la nappe profonde   (mois)   [TG12]
+physical_parameters.groundwater_1_2_exchange = {val=0.0, opt=false, min=0.05, max=50.0}
+# Seuil d'écoulement souterrain n°1 (rés. double)   (mm)   [SEUIL]
+physical_parameters.groundwater_1_double_outflow_threshold = {val=0.0, opt=false, min=0.0, max=9999.0}
+# Temps de 1/2 tarissement du débit souterr. n°2  (mois)   [TG2]
+physical_parameters.groundwater_2_drainage = {val=0.0, opt=false, min=0.05, max=50.0}
+# Facteur d'échange souterrain externe               (%)   [FACT_ECHANG]
+physical_parameters.groundwater_external_exchange = {val=0.0, opt=false, min=-70.0, max=80.0}
+
+# Temps de réaction ('retard') du débit   (pas de temps)
+physical_parameters.time_of_concentration = {val=0.0, opt=false, min=0.0, max=10.0}
+
+# Déficit initial du réservoir sol 'réserve utile'  (mm)
+physical_parameters.thornthewaite_reservoir_initial_deficit = {val=0.0, opt=false, min=0.0, max=999.0}
+# Déficit initial du réservoir sol progressif       (mm)
+physical_parameters.progressive_reservoir_initial_deficit = {val=0.0, opt=false, min=0.0, max=999.0}
+
+# Seuil de ruissellement par débordement            (mm)
+physical_parameters.intermediate_runoff_threshold = {val=0.0, opt=false, min=0.0, max=9999.0}
+# Temps de 1/2 ruissell. par débordement  (Pas de temps)
+physical_parameters.intermediate_half-life_runoff_by_overspill = {val=0.0, opt=false, min=0.05, max=9999.0}
+# Temps de 1/2 décroiss. maximal du ruissellement (mois)
+physical_parameters.intermediate_half-life_max_runoff_decrease = {val=0.0, opt=false, min=0.0001, max=1000.0}
+
+# Niveau de base local de la nappe               (m NGF)   [NB]
+physical_parameters.groundwater_base_level = {val=0.0, opt=false}
+# Coefficient d'emmagasinement de la nappe           (%)   [SG]
+physical_parameters.groundwater_storage_coefficient = {val=0.0, opt=false, min=0.5, max=35.0}
+
+# Correction globale de la température              (°C)
+physical_parameters.air-temp_correction = {val=0.0, opt=false, min=-3.0, max=3.0}
+# Taux de rétention de la neige                      (%)
+physical_parameters.snowfall_retention_factor = {val=0.0, opt=false, min=0.001, max=30.0}
+# Facteur d'évaporation de la neige                  (%)
+physical_parameters.snow_evaporation_factor = {val=0.0, opt=false, min=-20.0, max=20.0}
+# Correction de fonte de la neige par la pluie       (%)
+physical_parameters.snow_melt_correction_with_rainfall = {val=0.0, opt=false, min=-20.0, max=20.0}
+# Température seuil de fonte naturelle de la neige  (°C)
+physical_parameters.natural_snow_melting_threshold = {val=0.0, opt=false, min=-2.0, max=2.0}
+# Constante de fonte par la température     (mm/°C/jour)
+physical_parameters.snow_melt_degree_day_factor = {val=0.0, opt=false, min=0.001, max=7.0}
+# Fonte de la neige au contact du sol     (1/10 mm/jour)
+physical_parameters.snow_melting_in_contact_with_soil = {val=0.0, opt=false, min=0.001, max=20.0}
+
+# Coefficient d'influence du pompage => Débit Rivière (-)
+physical_parameters.pumping_river_influence_factor = {val=1.0, opt=false}
+# Temps de 1/2 montée du pompage infl. => Rivière  (mois)
+physical_parameters.pumping_river_half-life_rise = {val=0.5, opt=false, min=0.05, max=10.0}
+# Temps de 1/2 stabilisation du pompage => Rivière (mois)
+physical_parameters.pumping_river_half-life_fall = {val=2.0, opt=false, min=0.05, max=15.0}
+# Coefficient d'influence du pompage => Niveau Nappe  (-)
+physical_parameters.pumping_groundwater_influence_factor = {val=1.0, opt=false}
+# Temps de 1/2 montée du pompage infl. => Nappe    (mois)
+physical_parameters.pumping_groundwater_half-life_rise = {val=0.5, opt=false, min=0.05, max=10.0}
+# Temps de 1/2 stabilisation du pompage => Nappe   (mois)
+physical_parameters.pumping_groundwater_half-life_fall = {val=2.0, opt=false, min=0.05, max=15.0}
