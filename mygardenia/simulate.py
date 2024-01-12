@@ -98,9 +98,9 @@ class GardeniaModel(object):
         rga_file = separator.join(['config', "auto.rga"])
         gar_file = separator.join(['config', "auto.gar"])
 
-        # ----------------------------------------------------------------------
+        # ---------------------------------------------------------------------
         # generate *.rga file
-        # ----------------------------------------------------------------------
+        # ---------------------------------------------------------------------
         rga_text = convert_to_rga_content(
             gar=gar_file, **self._tree
         )
@@ -108,9 +108,9 @@ class GardeniaModel(object):
         with open(separator.join([self._working_dir, rga_file]), "w+") as f:
             f.writelines(rga_text)
 
-        # ----------------------------------------------------------------------
+        # ---------------------------------------------------------------------
         # generate *.gar file
-        # ----------------------------------------------------------------------
+        # ---------------------------------------------------------------------
         gar_text = convert_to_gar_content(
             **self._tree
         )
@@ -118,9 +118,9 @@ class GardeniaModel(object):
         with open(separator.join([self._working_dir, gar_file]), "w+") as f:
             f.writelines(gar_text)
 
-        # ----------------------------------------------------------------------
+        # ---------------------------------------------------------------------
         # run gardenia model
-        # ----------------------------------------------------------------------
+        # ---------------------------------------------------------------------
         msg = subprocess.run(
             [
                 f"{os.environ['bin_Garden']}{os.sep}gardenia.exe",
@@ -133,9 +133,9 @@ class GardeniaModel(object):
         if _verbose:
             print(msg)
 
-        # ----------------------------------------------------------------------
+        # ---------------------------------------------------------------------
         # move output files
-        # ----------------------------------------------------------------------
+        # ---------------------------------------------------------------------
         for f in glob.glob(f'{self._working_dir}{os.sep}*.*'):
             filename = f.split(os.sep)[-1]
             os.replace(
@@ -143,10 +143,18 @@ class GardeniaModel(object):
                 os.sep.join([self._working_dir, 'output', filename])
             )
 
-        # ----------------------------------------------------------------------
-        # post-process outputs
-        # ----------------------------------------------------------------------
-        output_file = os.sep.join([self._working_dir, 'output', "gardesim.prn"])
+        # ---------------------------------------------------------------------
+        # post-process outputs if they exist
+        # ---------------------------------------------------------------------
+        output_file = os.sep.join(
+            [self._working_dir, 'output', "gardesim.prn"]
+        )
+
+        if save_outputs and not pathlib.Path(output_file).is_file():
+            raise RuntimeError(
+                'outputs cannot be saved because *gardesim.prn* '
+                'does not exist'
+            )
 
         beg_river = None
         end_river = None
@@ -167,43 +175,127 @@ class GardeniaModel(object):
         with open(output_file, 'r') as f:
             n_lines = len(f.readlines())
 
-        options = dict(
-            encoding='windows-1252',
-            engine='python',
-            parse_dates=[0], date_format='%d/%m/%Y'
-        )
-
-        if beg_river and end_river:
-            df_river = pd.read_table(
-                output_file,
-                skiprows=beg_river, skipfooter=n_lines-end_river,
-                names=['dt', 'river_sim', 'river_obs'],
-                **options
+        if not bool(self._tree['general_settings']['forecast_run']):
+            # in simulation mode
+            options = dict(
+                encoding='windows-1252',
+                engine='python',
+                parse_dates=[0], date_format='%d/%m/%Y'
             )
-            self.streamflow = df_river
-            if save_outputs:
-                df_river.to_csv(
-                    separator.join(
-                        [self._working_dir, "output", "river_sim_obs.csv"]
-                    ),
-                    index=False
+
+            if beg_river and end_river:
+                df_river = pd.read_table(
+                    output_file,
+                    skiprows=beg_river, skipfooter=n_lines-end_river,
+                    names=['dt', 'river_sim', 'river_obs'],
+                    **options
                 )
 
-        if beg_piezo and end_piezo:
-            df_piezo = pd.read_table(
-                output_file,
-                skiprows=beg_piezo, skipfooter=n_lines-end_piezo,
-                names=['dt', 'piezo_sim', 'piezo_obs'],
-                **options
-            )
-            self.piezo_level = df_piezo
-            if save_outputs:
-                df_piezo.to_csv(
-                    separator.join(
-                        [self._working_dir, "output", "piezo_sim_obs.csv"]
-                    ),
-                    index=False
+                self.streamflow = df_river
+
+                if save_outputs:
+                    df_river.to_csv(
+                        separator.join(
+                            [self._working_dir, "output", "river_sim_obs.csv"]
+                        ),
+                        index=False
+                    )
+
+            if beg_piezo and end_piezo:
+                df_piezo = pd.read_table(
+                    output_file,
+                    skiprows=beg_piezo, skipfooter=n_lines-end_piezo,
+                    names=['dt', 'piezo_sim', 'piezo_obs'],
+                    **options
                 )
+
+                self.piezo_level = df_piezo
+
+                if save_outputs:
+                    df_piezo.to_csv(
+                        separator.join(
+                            [self._working_dir, "output", "piezo_sim_obs.csv"]
+                        ),
+                        index=False
+                    )
+        else:
+            # in forecast mode
+            options = dict(
+                encoding='windows-1252',
+                engine='python', header=None,
+                parse_dates=[0], date_format='%d/%m/%Y'
+            )
+
+            span = int(
+                self._tree['basin_settings']['time']['forecast']['span']
+            )
+
+            if beg_river and end_river:
+                df_river_top = pd.read_table(
+                    output_file,
+                    skiprows=beg_river,
+                    skipfooter=n_lines-end_river+span+2,
+                    encoding='windows-1252',
+                    engine='python', header=None,
+                    parse_dates=[0], date_format='%d/%m/%Y',
+                    names=['dt', 'river_sim', 'river_obs']
+                )
+                
+                df_river_btm = pd.read_table(
+                    output_file,
+                    skiprows=end_river-span-1,
+                    skipfooter=n_lines-end_river,
+                    names=['dt', 'unused', 'river_sim', 'river_obs',
+                           'river_frc_no-rain', 'river_frc_10%-dry',
+                           'river_frc_20%-dry', 'river_frc_50%',
+                           'river_frc_20%-wet', 'river_frc_10%-wet'],
+                    **options
+                )
+                df_river_btm = df_river_btm.drop('unused', axis=1)
+
+                df_river = pd.concat([df_river_top, df_river_btm], axis=0)
+
+                if save_outputs:
+                    df_river.to_csv(
+                        separator.join(
+                            [self._working_dir, "output",
+                             "river_sim_obs_frc.csv"]
+                        ),
+                        index=False
+                    )
+
+            if beg_piezo and end_piezo:
+                df_piezo_top = pd.read_table(
+                    output_file,
+                    skiprows=beg_piezo, skipfooter=n_lines-end_piezo+span+2,
+                    encoding='windows-1252',
+                    engine='python', header=None,
+                    parse_dates=[0], date_format='%d/%m/%Y',
+                    names=['dt', 'piezo_sim', 'piezo_obs']
+                )
+                
+                df_piezo_btm = pd.read_table(
+                    output_file,
+                    skiprows=end_piezo-span-1,
+                    skipfooter=n_lines-end_piezo,
+                    names=['dt', 'unused', 'piezo_sim', 'piezo_obs',
+                           'piezo_frc_no-rain', 'piezo_frc_10%-dry',
+                           'piezo_frc_20%-dry', 'piezo_frc_50%',
+                           'piezo_frc_20%-wet', 'piezo_frc_10%-wet'],
+                    **options
+                )
+                df_piezo_btm = df_piezo_btm.drop('unused', axis=1)
+                
+                df_piezo = pd.concat([df_piezo_top, df_piezo_btm], axis=0)
+
+                if save_outputs:
+                    df_piezo.to_csv(
+                        separator.join(
+                            [self._working_dir, "output",
+                             "piezo_sim_obs_frc.csv"]
+                        ),
+                        index=False
+                    )
 
     def _trim_output_of_spin_up(self, df: pd.DataFrame):
         # retrieve length of spin up run
