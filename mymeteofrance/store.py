@@ -9,7 +9,7 @@ from .collect import get_meteorology
 _variable_mapping = {
     'RR': 'Pluie',
     'ETPMON': 'ETP',
-    'ETPMONGRILLE': 'ETP',
+    'ETPGRILLE': 'ETP',
     'TM': 'Temperature'
 }
 
