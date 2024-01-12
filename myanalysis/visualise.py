@@ -28,7 +28,7 @@ def plot_time_series(
     :Parameters:
 
         working_dir: `str`
-            The file path the working directory where the data is stored
+            The path to the working directory where the data is stored
             in the 'data' subdirectory.
 
         rainfall_filename: `str`, optional
