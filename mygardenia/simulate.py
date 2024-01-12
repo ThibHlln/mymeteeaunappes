@@ -207,7 +207,7 @@ class GardeniaModel(object):
 
     def _trim_output_of_spin_up(self, df: pd.DataFrame):
         # retrieve length of spin up run
-        spin_up = (
+        spin_up = int(
             self._tree['basin_settings']['model']
             ['initialisation']['spinup']['n_years']
         )
@@ -221,8 +221,46 @@ class GardeniaModel(object):
 
         return df
 
+    def _select_calib_or_eval_period(
+            self, df: pd.DataFrame, period: str = 'calib'
+    ):
+        # retrieve length of evaluation period
+        evaluation = int(
+            self._tree['basin_settings']['model']
+            ['calibration']['n_tail_years_to_trim']
+        )
+
+        if (period == 'eval') and (evaluation == 0):
+            raise RuntimeError(
+                "no data kept aside for an evaluation period"
+            )
+
+        # subset in time to exclude spin up period
+        if evaluation >= 0:
+            # it is a number of years that is provided (e.g. 5)
+            swap_date = (
+                df['dt'].iloc[-1] - pd.offsets.DateOffset(years=evaluation)
+            )
+        else:
+            # it is a year that is provided (e.g. -2024)
+            swap_date = (
+                pd.to_datetime(f'{-evaluation}-12-31')
+            )
+
+        if period == 'calib':
+            df = df[df['dt'] <= swap_date]
+        elif period == 'eval':
+            df = df[df['dt'] > swap_date]
+        else:
+            raise ValueError(
+                f"period {repr(period)} is not valid, "
+                f"it must either be 'calib' or 'eval'"
+            )
+
+        return df
+
     def evaluate(
-            self, variable: str, metric: str,
+            self, variable: str, metric: str, period: str = None,
             transform: str = None, exponent: float = None
     ):
         """ Evaluate the performance between the simulations and the
@@ -238,6 +276,14 @@ class GardeniaModel(object):
                 The evaluation metric to use to compare observations and
                 simulations. It can be any metric available in `evalhyd`
                 (https://hydrogr.github.io/evalhyd/metrics/deterministic.html)
+
+            period: `str`, optional
+                The period to consider for the computation of the evaluation
+                metric. It can either be 'calib' (only the period used for
+                calibration is considered, excluding the initialisation
+                period) or 'eval' (only the tail period left aside and not
+                used for the calibration is considered). If not provided,
+                set to default value 'calib'.
 
             transform: `str`, optional
                 The transformation function to apply to the observations
@@ -278,6 +324,12 @@ class GardeniaModel(object):
         # subset in time to exclude spin up period
         df = self._trim_output_of_spin_up(df)
 
+        # choose between the calibration period
+        # and a potential evaluation period
+        df = self._select_calib_or_eval_period(
+            df, period=(period if period else 'calib')
+        )
+
         # returned evaluation metric value
         prefix = 'river' if variable == 'streamflow' else 'piezo'
 
@@ -289,7 +341,8 @@ class GardeniaModel(object):
         )[0].squeeze()
 
     def visualise(
-            self, variable: str, filename: str = None, fig_size: tuple = None
+            self, variable: str, period: str = None,
+            filename: str = None, fig_size: tuple = None
     ):
         """Visualise the simulations and the observations time series
         for a given variable.
@@ -299,6 +352,14 @@ class GardeniaModel(object):
             variable: `str`
                 The model variable to evaluate. It can either be
                 'streamflow' or 'piezo_level'.
+
+            period: `str`, optional
+                The period to consider for the computation of the evaluation
+                metric. It can either be 'calib' (only the period used for
+                calibration is considered, excluding the initialisation
+                period) or 'eval' (only the tail period left aside and not
+                used for the calibration is considered). If not provided,
+                set to default value 'calib'.
 
             filename: `str`, optional
                 The file name to use for storing the visualisation. The
@@ -335,6 +396,12 @@ class GardeniaModel(object):
 
         # subset in time to exclude spin up period
         df = self._trim_output_of_spin_up(df)
+
+        # choose between the calibration period
+        # and a potential evaluation period
+        df = self._select_calib_or_eval_period(
+            df, period=(period if period else 'calib')
+        )
 
         # generate plot
         fig, ax = plt.subplots(
