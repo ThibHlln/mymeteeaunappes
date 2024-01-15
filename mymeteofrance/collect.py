@@ -385,6 +385,13 @@ def get_meteorology(
     else:
         end_date = close_date
 
+    # sanity check on dates
+    if start_date > end_date:
+        raise RuntimeError(
+            f"start date cannot be later than end date "
+            f"({start_date} > {end_date})"
+        )
+
     # collect data one year at a time
     df = pd.DataFrame(
         {'DATE': pd.Series(dtype='datetime64[ns]')}
