@@ -7,7 +7,7 @@ import numpy as np
 
 def _collect_list_working_dirs(
         history_dir: str
-):
+) -> tuple:
     # collect list of working directories contained in history directory
     working_dirs = sorted(glob(f'{history_dir}/V*'))
 
@@ -16,15 +16,17 @@ def _collect_list_working_dirs(
             'no directory named V# found in history directory'
         )
 
-    return working_dirs
+    versions = [d.split(f'{os.sep}V')[-1] for d in working_dirs]
+
+    return working_dirs, versions
 
 
 def _collect_simulation_history(
         var: str,
         history_dir: str
-) -> pd.DataFrame:
+) -> tuple:
     # collect list of working directories contained in history directory
-    working_dirs = _collect_list_working_dirs(history_dir)
+    working_dirs, versions = _collect_list_working_dirs(history_dir)
 
     # collect all time series
     df = pd.read_csv(
@@ -33,22 +35,22 @@ def _collect_simulation_history(
     )
     df = df.set_index('dt')
     df = df[[f'{var}_obs', f'{var}_sim']]
-    df = df.rename(columns={f'{var}_sim': f'{var}_sim_V0'})
+    df = df.rename(columns={f'{var}_sim': f'{var}_sim_V{versions[0]}'})
 
-    for i, working_dir in enumerate(working_dirs[1:]):
+    for working_dir, version in zip(working_dirs[1:], versions[1:]):
         df_ = pd.read_csv(
             f"{working_dir}/output/{var}_sim_obs.csv",
             parse_dates=['dt']
         )
         df_ = df_.set_index('dt')
         df_ = df_[[f'{var}_sim']]
-        df_.columns = [f'{var}_sim_V{i + 1}']
+        df_.columns = [f'{var}_sim_V{version}']
 
         df = pd.concat([df, df_], axis=1)
 
     df = df.reset_index(drop=False, names='dt')
 
-    return df
+    return df, versions
 
 
 def plot_simulation_history(
@@ -70,9 +72,8 @@ def plot_simulation_history(
             The path to the history directory containing a collection
             of subdirectories that are independent working directories
             (i.e. they follow the config/data/output internal structure).
-            The working directories must be named following the convention
-            V#, where # is a number starting from 0, and going with
-            integer increments.
+            The working directories must be named starting with a capital
+            V followed by any valid character(s).
 
             See below the structure and naming conventions that the
             history directory must follow:
@@ -115,7 +116,7 @@ def plot_simulation_history(
     var = 'river' if variable == 'streamflow' else 'piezo'
 
     # collect all time series
-    df = _collect_simulation_history(var, history_dir)
+    df, versions = _collect_simulation_history(var, history_dir)
 
     # initialise figure
     fig, ax = plt.subplots(
@@ -129,15 +130,13 @@ def plot_simulation_history(
     )
 
     # plot simulations time series
-    n_sim = df.shape[1] - 2
+    alphas = np.linspace(start=0.2, stop=1, num=len(versions))
 
-    alphas = np.linspace(start=0.2, stop=1, num=n_sim)
-
-    for i in range(n_sim):
+    for i, version in enumerate(versions):
         ax.plot(
-            df['dt'], df[f'{var}_sim_V{i}'], label=f'sim V{i}', linestyle='-',
-            color='tab:blue' if variable == 'streamflow' else 'tab:purple',
-            alpha=alphas[i]
+            df['dt'], df[f'{var}_sim_V{version}'], label=f'sim V{version}',
+            linestyle='-', alpha=alphas[i],
+            color='tab:blue' if variable == 'streamflow' else 'tab:purple'
         )
 
     ax.set_ylabel(
@@ -164,7 +163,7 @@ def _collect_prn_history(
 
 ):
     # collect list of working directories contained in history directory
-    working_dirs = _collect_list_working_dirs(history_dir)
+    working_dirs, versions = _collect_list_working_dirs(history_dir)
 
     # collect all performances
     df = pd.read_table(
@@ -174,9 +173,9 @@ def _collect_prn_history(
         engine='python'
     )
     df = df.iloc[:, skip_left:-skip_right]
-    df.index = ['V0']
+    df.index = [f'V{versions[0]}']
 
-    for i, working_dir in enumerate(working_dirs[1:]):
+    for working_dir, version in zip(working_dirs[1:], versions[1:]):
         df_ = pd.read_table(
             f"{working_dir}/output/{filename}",
             delimiter='\t', encoding='cp1252',
@@ -184,7 +183,7 @@ def _collect_prn_history(
             engine='python'
         )
         df_ = df_.iloc[:, skip_left:-skip_right]
-        df_.index = [f'V{i + 1}']
+        df_.index = [f'V{version}']
 
         df = pd.concat([df, df_], axis=0)
 
@@ -203,9 +202,8 @@ def collect_performance_history(
             The path to the history directory containing a collection
             of subdirectories that are independent working directories
             (i.e. they follow the config/data/output internal structure).
-            The working directories must be named following the convention
-            V#, where # is a number starting from 0, and going with
-            integer increments.
+            The working directories must be named starting with a capital
+            V followed by any valid character(s).
 
             See below the structure and naming conventions that the
             history directory must follow:
@@ -248,9 +246,8 @@ def collect_parameters_history(
             The path to the history directory containing a collection
             of subdirectories that are independent working directories
             (i.e. they follow the config/data/output internal structure).
-            The working directories must be named following the convention
-            V#, where # is a number starting from 0, and going with
-            integer increments.
+            The working directories must be named starting with a capital
+            V followed by any valid character(s).
 
             See below the structure and naming conventions that the
             history directory must follow:
