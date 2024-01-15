@@ -57,7 +57,8 @@ def plot_simulation_history(
         variable: str,
         history_dir: str,
         plot_filename: str = None,
-        fig_size: tuple = None
+        fig_size: tuple = None,
+        colors: list = None
 ) -> None:
     """Plot the evolution of the simulation time series for a given
     variable between the different version iterations.
@@ -104,6 +105,13 @@ def plot_simulation_history(
             The width and the height of the figure as a tuple.
             If not provided, set to (10, 4).
 
+        colors: `list`, optional
+            The list of colors to use for displaying the different
+            version iterations. It must be the name length as the number
+            of versions. If not provided, a shade of blue is used for
+            the variable 'streamflow' and a shade of purple if used for
+            the variable 'piezo_level'
+
     :Returns:
 
         `None`
@@ -130,13 +138,22 @@ def plot_simulation_history(
     )
 
     # plot simulations time series
-    alphas = np.linspace(start=0.2, stop=1, num=len(versions))
+    if colors:
+        if len(colors) != len(versions):
+            raise ValueError(
+                'number of colors not equal to number of versions'
+            )
+    else:
+        colors = plt.get_cmap(
+            'Blues' if variable == 'streamflow' else 'Purples',
+            len(versions)
+        )
+        colors = [colors(i) for i in range(len(versions))]
 
     for i, version in enumerate(versions):
         ax.plot(
             df['dt'], df[f'{var}_sim_V{version}'], label=f'sim V{version}',
-            linestyle='-', alpha=alphas[i],
-            color='tab:blue' if variable == 'streamflow' else 'tab:purple'
+            linestyle='-', color=colors[i]
         )
 
     ax.set_ylabel(
