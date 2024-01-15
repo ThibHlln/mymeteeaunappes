@@ -398,44 +398,58 @@ def get_meteorology(
         | {var: pd.Series(dtype='float64') for var in list(set(variables))}
     )
 
-    # first year
-    df = pd.concat(
-        [
-            df,
-            _get_dataframe(
-                variables=variables, station_id=station_id,
-                start=start_date.strftime('%Y-%m-%dT%H:%M:%SZ'),
-                end=f'{start_date.year}-12-31T00:00:00Z',
-                api_key=api_key
-            )
-        ]
-    )
-
-    # years in between
-    for yr in range(start_date.year + 1, end_date.year):
+    # check if period is over multiple calendar years
+    if end_date.year > start_date.year:
+        # first year
         df = pd.concat(
             [
                 df,
                 _get_dataframe(
                     variables=variables, station_id=station_id,
-                    start=f'{yr}-01-01T00:00:00Z',
-                    end=f'{yr}-12-31T00:00:00Z',
+                    start=start_date.strftime('%Y-%m-%dT%H:%M:%SZ'),
+                    end=f'{start_date.year}-12-31T00:00:00Z',
                     api_key=api_key
                 )
             ]
         )
 
-    # last year
-    df = pd.concat(
-        [
-            df,
-            _get_dataframe(
-                variables=variables, station_id=station_id,
-                start=f'{end_date.year}-01-01T00:00:00Z',
-                end=end_date.strftime('%Y-%m-%dT%H:%M:%SZ'),
-                api_key=api_key
+        # years in between
+        for yr in range(start_date.year + 1, end_date.year):
+            df = pd.concat(
+                [
+                    df,
+                    _get_dataframe(
+                        variables=variables, station_id=station_id,
+                        start=f'{yr}-01-01T00:00:00Z',
+                        end=f'{yr}-12-31T00:00:00Z',
+                        api_key=api_key
+                    )
+                ]
             )
-        ]
-    )
+
+        # last year
+        df = pd.concat(
+            [
+                df,
+                _get_dataframe(
+                    variables=variables, station_id=station_id,
+                    start=f'{end_date.year}-01-01T00:00:00Z',
+                    end=end_date.strftime('%Y-%m-%dT%H:%M:%SZ'),
+                    api_key=api_key
+                )
+            ]
+        )
+    else:
+        df = pd.concat(
+            [
+                df,
+                _get_dataframe(
+                    variables=variables, station_id=station_id,
+                    start=start_date.strftime('%Y-%m-%dT%H:%M:%SZ'),
+                    end=end_date.strftime('%Y-%m-%dT%H:%M:%SZ'),
+                    api_key=api_key
+                )
+            ]
+        )
 
     return df.reset_index(drop=True)
