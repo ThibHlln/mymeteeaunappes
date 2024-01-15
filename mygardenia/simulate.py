@@ -434,7 +434,8 @@ class GardeniaModel(object):
 
     def visualise(
             self, variable: str, period: str = None,
-            filename: str = None, fig_size: tuple = None
+            filename: str = None, fig_size: tuple = None,
+            return_fig: bool = False
     ):
         """Visualise the simulations and the observations time series
         for a given variable.
@@ -463,9 +464,15 @@ class GardeniaModel(object):
                 The width and the height of the figure as a tuple.
                 If not provided, set to (10, 4).
 
+            return_fig: `bool`, optional
+                Whether to return the figure object used to generate the
+                plot. If not provided, it is not returned.
+
         :Returns:
 
-            `None`
+            `None` or `matplotlib.figure.Figure`
+                The figure used to create the plot to use if further
+                customisation is necessary.
 
         **Examples**
 
@@ -526,3 +533,7 @@ class GardeniaModel(object):
             )
         else:
             plt.show()
+
+        # optionally return the figure
+        if return_fig:
+            return fig

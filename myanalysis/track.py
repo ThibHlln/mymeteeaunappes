@@ -2,7 +2,6 @@ import os
 from glob import glob
 import pandas as pd
 import matplotlib.pyplot as plt
-import numpy as np
 
 
 def _collect_list_working_dirs(
@@ -58,7 +57,8 @@ def plot_simulation_history(
         history_dir: str,
         plot_filename: str = None,
         fig_size: tuple = None,
-        colors: list = None
+        colors: list = None,
+        return_fig: bool = False
 ) -> None:
     """Plot the evolution of the simulation time series for a given
     variable between the different version iterations.
@@ -112,9 +112,15 @@ def plot_simulation_history(
             the variable 'streamflow' and a shade of purple if used for
             the variable 'piezo_level'
 
+        return_fig: `bool`, optional
+            Whether to return the figure object used to generate the
+            plot. If not provided, it is not returned.
+
     :Returns:
 
-        `None`
+        `None` or `matplotlib.figure.Figure`
+            The figure used to create the plot to use if further
+            customisation is necessary.
     """
     # check variable value
     if variable not in ['streamflow', 'piezo_level']:
@@ -170,6 +176,10 @@ def plot_simulation_history(
         )
     else:
         plt.show()
+
+    # optionally return the figure
+    if return_fig:
+        return fig
 
 
 def _collect_prn_history(
