@@ -150,7 +150,7 @@ physical_parameters.annual_effective-rainfall = {val=0.0}
 # Débit extérieur éventuel                        (m3/s)
 physical_parameters.external_flow = {val=0.0, opt=false}
 # Superficie du bassin versant                     (km2)
-physical_parameters.basin_area = {val=1.0, opt=false}
+physical_parameters.basin_area = {val=524.0, opt=false}
 
 # Correction globale des Pluies                      (%)
 physical_parameters.rainfall_correction = {val=0.0, opt=false, min=-10.0, max=10.0}
