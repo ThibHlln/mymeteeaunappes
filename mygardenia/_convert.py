@@ -1,3 +1,249 @@
+import re
+
+# information on how to parse RGA/GAR files to populate a Gardenia tree
+_rga_line_parsing = {
+    1: {'description.project': (0, -1)},
+    4: {'data.simulation.rainfall': (0, 70)},
+    5: {'data.simulation.pet': (0, 70)},
+    6: {'data.observation.streamflow': (0, 70)},
+    7: {'data.observation.piezo-level': (0, 70)},
+    8: {'data.simulation.air-temp': (0, 70)},
+    9: {'data.simulation.snowfall': (0, 70)},
+    10: {'data.forecast.rainfall': (0, 70)},
+    11: {'data.forecast.pet': (0, 70)},
+    12: {'data.forecast.air-temp': (0, 70)},
+    13: {'data.forecast.snowfall': (0, 70)},
+    14: {'data.influence.pumping_or_injection': (0, 70)},
+    15: {'data.other.weather_tile_weights': (0, 70)}
+}
+
+_gar_line_parsing = {
+    1: {'description.project': (0, -1)},
+    4: {'general_settings.user_profile': (1, 10)},
+    5: {'general_settings.execution_mode': (1, 10)},
+    6: {'general_settings.computation_mode': (1, 10)},
+    8: {'general_settings.n_sites': (1, 10)},
+    9: {'general_settings.forecast_data_type': (1, 10)},
+    10: {'general_settings.streamflow_obs_weight': (1, 10)},
+    11: {'general_settings.piezo-level_obs_weight': (1, 10)},
+    12: {'general_settings.calc_streamflow': (1, 10)},
+    13: {'general_settings.calc_piezo-level': (1, 10)},
+    14: {'general_settings.save_recharge_effective-rainfall': (1, 10)},
+    15: {'general_settings.save_streamflow_piezo-level': (1, 10)},
+    16: {'general_settings.save_water-balance': (1, 10)},
+    17: {'general_settings.verbose': (1, 10)},
+    18: {'general_settings.computation_scheme': (1, 10)},
+    19: {'general_settings.draw_series': (1, 10)},
+    20: {'general_settings.transform_calibration_data': (1, 10)},
+    21: {'general_settings.minimise_streamflow_bias': (1, 10)},
+    22: {'general_settings.pumping_influencing_streamflow': (1, 10)},
+    23: {'general_settings.pumping_influencing_piezo-level': (1, 10)},
+    24: {'general_settings.forecast_run': (1, 10)},
+    25: {'general_settings.forecast_method': (1, 10)},
+    26: {'general_settings.underground_exchange_scheme': (1, 10)},
+    27: {'general_settings.daily_summary': (1, 10)},
+    28: {'general_settings.consider_snow': (1, 10)},
+    29: {'general_settings.snowfall_in_file': (1, 10)},
+    30: {'general_settings.data_per_hydro_year': (1, 10)},
+    31: {'general_settings.streamflow_loss': (1, 10)},
+    32: {'general_settings.sensitivity_analysis': (1, 10)},
+    33: {'general_settings.save_impulse_and_cumulative_response': (1, 10)},
+    34: {'general_settings.site_data_in_columns': (1, 10)},
+    35: {'general_settings.simulation_rainfall_column_number': (1, 10)},
+    36: {'general_settings.simulation_pet_column_number': (1, 10)},
+    37: {'general_settings.simulation_streamflow_column_number': (1, 10)},
+    38: {'general_settings.simulation_piezo-level_column_number': (1, 10)},
+    39: {'general_settings.simulation_air-temp_column_number': (1, 10)},
+    40: {'general_settings.simulation_snowfall_column_number': (1, 10)},
+    41: {'general_settings.simulation_pumping_column_number': (1, 10)},
+    42: {'general_settings.forecast_rainfall_column_number': (1, 10)},
+    43: {'general_settings.forecast_air-temp_column_number': (1, 10)},
+    44: {'general_settings.forecast_pet_column_number': (1, 10)},
+    45: {'general_settings.forecast_snowfall_column_number': (1, 10)},
+    46: {'general_settings.weather_data_weighting_per_time_step': (1, 10)},
+    47: {'general_settings.save_weather_data_weighting': (1, 10)},
+    48: {'general_settings.openpalm_coupling': (1, 10)},
+    50: {'time.rainfall_snowfall_pumping_timestep': (1, 10)},
+    51: {'time.rainfall_snowfall_pumping_format': (1, 10)},
+    53: {'time.air-temp_timestep': (1, 10)},
+    54: {'time.air-temp_format': (1, 10)},
+    56: {'time.pet_timestep': (1, 10)},
+    57: {'time.pet_format': (1, 10)},
+    59: {'time.streamflow_piezo-level_timestep': (1, 10)},
+    60: {'time.streamflow_piezo-level_format': (1, 10)},
+    62: {'time.non_standard_timestep_duration_unit': (1, 10)},
+    63: {'time.non_standard_timestep_duration': (1, 10)},
+    66: {'description.basin': (0, -1)},
+    67: {'filter_settings.observed_streamflow_to_consider.max': (1, 10)},
+    68: {'filter_settings.observed_streamflow_to_consider.min': (1, 10)},
+    69: {'filter_settings.observed_piezo-level_to_consider.max': (1, 10)},
+    70: {'filter_settings.observed_piezo-level_to_consider.min': (1, 10)},
+    71: {'forecast_settings.readjustment_factor': (1, 10)},
+    72: {'forecast_settings.standard_deviation_of_intermediate_reservoir': (1, 10)},
+    73: {'forecast_settings.standard_deviation_of_groundwater_reservoir_1': (1, 10)},
+    74: {'forecast_settings.standard_deviation_of_groundwater_reservoir_2': (1, 10)},
+    75: {'filter_settings.simulated_streamflow_lower_limit_to_apply': (1, 10)},
+    76: {'forecast_settings.standard_deviation_of_observed_piezo-level': (1, 10)},
+    77: {'forecast_settings.half-life_fall_streamflow_forecast': (1, 10)},
+    78: {'forecast_settings.half-life_fall_piezo-level_forecast': (1, 10)},
+    80: {'basin_settings.time.simulation.n_years_in_data': (1, 10)},
+    81: {'basin_settings.model.initialisation.spinup.n_years': (1, 10)},
+    82: {'basin_settings.model.initialisation.spinup.n_cycles': (1, 10)},
+    83: {'basin_settings.time.simulation.first_year': (1, 10)},
+    84: {'basin_settings.time.delay_in_rainfall_data': (1, 10)},
+    85: {'basin_settings.time.delay_in_streamflow_piezo-level_data': (1, 10)},
+    86: {'basin_settings.model.initialisation.antecedent_conditions': (1, 10)},
+    87: {'basin_settings.model.calibration.max_iterations': (1, 10)},
+    88: {'basin_settings.time.rainfall_mean_duration_within_timestep': (1, 10)},
+    89: {'basin_settings.model.structure.n_groundwater_reservoirs': (1, 10)},
+    90: {'basin_settings.model.structure.groundwater_reservoir_for_piezo-level': (1, 10)},
+    91: {'basin_settings.model.calibration.n_tail_years_to_trim': (1, 10)},
+    92: {'basin_settings.time.simulation.first_day': (1, 10)},
+    93: {'basin_settings.time.simulation.first_month': (1, 10)},
+    94: {'basin_settings.time.simulation.first_hour': (1, 10)},
+    95: {'basin_settings.time.simulation.first_minute': (1, 10)},
+    96: {'basin_settings.model.structure.intermediate_runoff_by_overspill': (1, 10)},
+    97: {'basin_settings.model.structure.intermediate_reservoir_evapotranspiration_decrease_only_when_half_empty': (1, 10)},
+    98: {'basin_settings.model.structure.constant_runoff_ratio_scheme': (1, 10)},
+    99: {'basin_settings.model.structure.storage_coefficient_computation_scheme': (1, 10)},
+    101: {'basin_settings.time.forecast.n_years_in_data': (1, 10)},
+    102: {'basin_settings.time.forecast.issue_day': (1, 10)},
+    103: {'basin_settings.time.forecast.issue_month': (1, 10)},
+    104: {'basin_settings.time.forecast.span': (1, 10)},
+    105: {'basin_settings.time.forecast.first_year': (1, 10)},
+    107: {'basin_settings.data.basin_column_number_in_data': (1, 10)},
+    109: {'physical_parameters.annual_effective-rainfall.val': (1, 10)},
+    110: {'physical_parameters.external_flow.val': (1, 10),
+          'physical_parameters.external_flow.opt': (72, 74)},
+    111: {'physical_parameters.basin_area.val': (1, 10),
+          'physical_parameters.basin_area.opt': (72, 74)},
+    112: {'physical_parameters.groundwater_base_level.val': (1, 10),
+          'physical_parameters.groundwater_base_level.opt': (72, 74)},
+    113: {'physical_parameters.rainfall_correction.val': (1, 10),
+          'physical_parameters.rainfall_correction.opt': (72, 74)},
+    114: {'physical_parameters.pet_correction.val': (1, 10),
+          'physical_parameters.pet_correction.opt': (72, 74)},
+    115: {'physical_parameters.thornthewaite_reservoir_capacity.val': (1, 10),
+          'physical_parameters.thornthewaite_reservoir_capacity.opt': (72, 74)},
+    116: {'physical_parameters.progressive_reservoir_capacity.val': (1, 10),
+          'physical_parameters.progressive_reservoir_capacity.opt': (72, 74)},
+    117: {'physical_parameters.intermediate_runoff_seepage.val': (1, 10),
+          'physical_parameters.intermediate_runoff_seepage.opt': (72, 74)},
+    118: {'physical_parameters.intermediate_half-life_seepage.val': (1, 10),
+          'physical_parameters.intermediate_half-life_seepage.opt': (72, 74)},
+    119: {'physical_parameters.groundwater_1_drainage.val': (1, 10),
+          'physical_parameters.groundwater_1_drainage.opt': (72, 74)},
+    120: {'physical_parameters.groundwater_1_2_exchange.val': (1, 10),
+          'physical_parameters.groundwater_1_2_exchange.opt': (72, 74)},
+    121: {'physical_parameters.groundwater_1_double_outflow_threshold.val': (1, 10),
+          'physical_parameters.groundwater_1_double_outflow_threshold.opt': (72, 74)},
+    122: {'physical_parameters.groundwater_2_drainage.val': (1, 10),
+          'physical_parameters.groundwater_2_drainage.opt': (72, 74)},
+    123: {'physical_parameters.time_of_concentration.val': (1, 10),
+          'physical_parameters.time_of_concentration.opt': (72, 74)},
+    124: {'physical_parameters.groundwater_external_exchange.val': (1, 10),
+          'physical_parameters.groundwater_external_exchange.opt': (72, 74)},
+    125: {'physical_parameters.thornthewaite_reservoir_initial_deficit.val': (1, 10),
+          'physical_parameters.thornthewaite_reservoir_initial_deficit.opt': (72, 74)},
+    126: {'physical_parameters.progressive_reservoir_initial_deficit.val': (1, 10),
+          'physical_parameters.progressive_reservoir_initial_deficit.opt': (72, 74)},
+    127: {'physical_parameters.intermediate_runoff_threshold.val': (1, 10),
+          'physical_parameters.intermediate_runoff_threshold.opt': (72, 74)},
+    128: {'physical_parameters.intermediate_half-life_runoff_by_overspill.val': (1, 10),
+          'physical_parameters.intermediate_half-life_runoff_by_overspill.opt': (72, 74)},
+    129: {'physical_parameters.intermediate_half-life_max_runoff_decrease.val': (1, 10),
+          'physical_parameters.intermediate_half-life_max_runoff_decrease.opt': (72, 74)},
+    130: {'physical_parameters.basin_area_correction.val': (1, 10),
+          'physical_parameters.basin_area_correction.opt': (72, 74)},
+    131: {'physical_parameters.groundwater_storage_coefficient.val': (1, 10),
+          'physical_parameters.groundwater_storage_coefficient.opt': (72, 74)},
+    133: {'physical_parameters.rainfall_correction.min': (1, 10),
+          'physical_parameters.rainfall_correction.max': (77, 87)},
+    134: {'physical_parameters.pet_correction.min': (1, 10),
+          'physical_parameters.pet_correction.max': (77, 87)},
+    135: {'physical_parameters.thornthewaite_reservoir_capacity.min': (1, 10),
+          'physical_parameters.thornthewaite_reservoir_capacity.max': (77, 87)},
+    136: {'physical_parameters.progressive_reservoir_capacity.min': (1, 10),
+          'physical_parameters.progressive_reservoir_capacity.max': (77, 87)},
+    137: {'physical_parameters.intermediate_runoff_seepage.min': (1, 10),
+          'physical_parameters.intermediate_runoff_seepage.max': (77, 87)},
+    138: {'physical_parameters.intermediate_half-life_seepage.min': (1, 10),
+          'physical_parameters.intermediate_half-life_seepage.max': (77, 87)},
+    139: {'physical_parameters.groundwater_1_drainage.min': (1, 10),
+          'physical_parameters.groundwater_1_drainage.max': (77, 87)},
+    140: {'physical_parameters.groundwater_1_2_exchange.min': (1, 10),
+          'physical_parameters.groundwater_1_2_exchange.max': (77, 87)},
+    141: {'physical_parameters.groundwater_1_double_outflow_threshold.min': (1, 10),
+          'physical_parameters.groundwater_1_double_outflow_threshold.max': (77, 87)},
+    142: {'physical_parameters.groundwater_2_drainage.min': (1, 10),
+          'physical_parameters.groundwater_2_drainage.max': (77, 87)},
+    143: {'physical_parameters.time_of_concentration.min': (1, 10),
+          'physical_parameters.time_of_concentration.max': (77, 87)},
+    144: {'physical_parameters.groundwater_external_exchange.min': (1, 10),
+          'physical_parameters.groundwater_external_exchange.max': (77, 87)},
+    145: {'physical_parameters.thornthewaite_reservoir_initial_deficit.min': (1, 10),
+          'physical_parameters.thornthewaite_reservoir_initial_deficit.max': (77, 87)},
+    146: {'physical_parameters.progressive_reservoir_initial_deficit.min': (1, 10),
+          'physical_parameters.progressive_reservoir_initial_deficit.max': (77, 87)},
+    147: {'physical_parameters.intermediate_runoff_threshold.min': (1, 10),
+          'physical_parameters.intermediate_runoff_threshold.max': (77, 87)},
+    148: {'physical_parameters.intermediate_half-life_runoff_by_overspill.min': (1, 10),
+          'physical_parameters.intermediate_half-life_runoff_by_overspill.max': (77, 87)},
+    149: {'physical_parameters.intermediate_half-life_max_runoff_decrease.min': (1, 10),
+          'physical_parameters.intermediate_half-life_max_runoff_decrease.max': (77, 87)},
+    150: {'physical_parameters.basin_area_correction.min': (1, 10),
+          'physical_parameters.basin_area_correction.max': (77, 87)},
+    151: {'physical_parameters.groundwater_storage_coefficient.min': (1, 10),
+          'physical_parameters.groundwater_storage_coefficient.max': (77, 87)},
+    153: {'physical_parameters.air-temp_correction.val': (1, 10),
+          'physical_parameters.air-temp_correction.opt': (72, 74)},
+    154: {'physical_parameters.snowfall_retention_factor.val': (1, 10),
+          'physical_parameters.snowfall_retention_factor.opt': (72, 74)},
+    155: {'physical_parameters.snow_evaporation_factor.val': (1, 10),
+          'physical_parameters.snow_evaporation_factor.opt': (72, 74)},
+    156: {'physical_parameters.snow_melt_correction_with_rainfall.val': (1, 10),
+          'physical_parameters.snow_melt_correction_with_rainfall.opt': (72, 74)},
+    157: {'physical_parameters.natural_snow_melting_threshold.val': (1, 10),
+          'physical_parameters.natural_snow_melting_threshold.opt': (72, 74)},
+    158: {'physical_parameters.snow_melt_degree_day_factor.val': (1, 10),
+          'physical_parameters.snow_melt_degree_day_factor.opt': (72, 74)},
+    159: {'physical_parameters.snow_melting_in_contact_with_soil.val': (1, 10),
+          'physical_parameters.snow_melting_in_contact_with_soil.opt': (72, 74)},
+    161: {'physical_parameters.air-temp_correction.min': (1, 10),
+          'physical_parameters.air-temp_correction.max': (77, 87)},
+    162: {'physical_parameters.snowfall_retention_factor.min': (1, 10),
+          'physical_parameters.snowfall_retention_factor.max': (77, 87)},
+    163: {'physical_parameters.snow_evaporation_factor.min': (1, 10),
+          'physical_parameters.snow_evaporation_factor.max': (77, 87)},
+    164: {'physical_parameters.snow_melt_correction_with_rainfall.min': (1, 10),
+          'physical_parameters.snow_melt_correction_with_rainfall.max': (77, 87)},
+    165: {'physical_parameters.natural_snow_melting_threshold.min': (1, 10),
+          'physical_parameters.natural_snow_melting_threshold.max': (77, 87)},
+    166: {'physical_parameters.snow_melt_degree_day_factor.min': (1, 10),
+          'physical_parameters.snow_melt_degree_day_factor.max': (77, 87)},
+    167: {'physical_parameters.snow_melting_in_contact_with_soil.min': (1, 10),
+          'physical_parameters.snow_melting_in_contact_with_soil.max': (77, 87)},
+    169: {'physical_parameters.pumping_river_influence_factor.val': (1, 10),
+          'physical_parameters.pumping_river_influence_factor.opt': (72, 74)},
+    170: {'physical_parameters.pumping_river_half-life_rise.val': (1, 10),
+          'physical_parameters.pumping_river_half-life_rise.opt': (72, 74)},
+    171: {'physical_parameters.pumping_river_half-life_fall.val': (1, 10),
+          'physical_parameters.pumping_river_half-life_fall.opt': (72, 74)},
+    172: {'physical_parameters.pumping_groundwater_influence_factor.val': (1, 10),
+          'physical_parameters.pumping_groundwater_influence_factor.opt': (72, 74)},
+    173: {'physical_parameters.pumping_groundwater_half-life_rise.val': (1, 10),
+          'physical_parameters.pumping_groundwater_half-life_rise.opt': (72, 74)},
+    174: {'physical_parameters.pumping_groundwater_half-life_fall.val': (1, 10),
+          'physical_parameters.pumping_groundwater_half-life_fall.opt': (72, 74)},
+    176: {'physical_parameters.pumping_river_half-life_rise.min': (1, 10),
+          'physical_parameters.pumping_river_half-life_rise.max': (78, 88)},
+    177: {'physical_parameters.pumping_river_half-life_fall.min': (1, 10),
+          'physical_parameters.pumping_river_half-life_fall.max': (78, 88)},
+    178: {'physical_parameters.pumping_groundwater_half-life_rise.min': (1, 10),
+          'physical_parameters.pumping_groundwater_half-life_rise.max': (78, 88)},
+    179: {'physical_parameters.pumping_groundwater_half-life_fall.min': (1, 10),
+          'physical_parameters.pumping_groundwater_half-life_fall.max': (78, 88)}
+}
 
 
 def convert_to_rga_content(
@@ -216,3 +462,50 @@ def convert_to_gar_content(
  {physical_parameters['pumping_groundwater_half-life_fall']['min']:9.5f}=Min : Temps de 1/2 stabilisation du pompage => Nappe   (mois) Max ={physical_parameters['pumping_groundwater_half-life_fall']['max']:10.5f}
  *** >>>>>>>>>>>>>> Fin des données du bassin ] >>>>>
  """
+
+
+def _parse_file(file: str, parser: dict) -> dict:
+    d = {}
+
+    with open(file, 'r') as f:
+        # explore file line by line
+        for ln, txt in enumerate(f, start=1):
+            # if line number contained in parser, there is parsing to do
+            if ln in parser:
+                for key_path, (start, end) in parser[ln].items():
+                    # key path features the keys separated by dots
+                    # to use to navigate through the nested dictionary
+                    keys = key_path.split('.')
+
+                    # iteratively go down the nested dictionary and
+                    # create dictionaries if necessary along the way
+                    d_ = d
+                    for key in keys[:-1]:
+                        if key not in d_:
+                            d_[key] = {}
+                        d_ = d_[key]
+
+                    # finally assign the value once in the right place
+                    # in the nested dictionary
+                    if (
+                            re.compile(r'physical_parameters\..*\.(val|min|max)').findall(key_path)
+                            or re.compile(r'filter_settings\..*').findall(key_path)
+                            or re.compile(r'forecast_settings\..*').findall(key_path)
+                    ):
+                        d_[keys[-1]] = float(txt[start:end].strip())
+                    elif (
+                            re.compile(r'physical_parameters\..*\.opt').findall(key_path)
+                    ):
+                        d_[keys[-1]] = bool(int(txt[start:end].strip()))
+                    else:
+                        d_[keys[-1]] = txt[start:end].strip()
+
+    return d
+
+
+def parse_rga_content(rga_file: str) -> dict:
+    return _parse_file(rga_file, _rga_line_parsing)
+
+
+def parse_gar_content(gar_file: str) -> dict:
+    return _parse_file(gar_file, _gar_line_parsing)

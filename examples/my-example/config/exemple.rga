@@ -1,0 +1,16 @@
+example run
+ #<V8.2># --- Fin du texte libre --- ; Ne pas modifier/retirer cette ligne
+exemple.gar                                                           = Param�tres et Options
+pluie.prn                                                             = Pluies
+etp.prn                                                               = �vapo-Transpirations Potentielles (ETP)
+debit.prn                                                             = D�bits de Rivi�re
+niveau.prn                                                            = Niveaux de Nappe
+                                                                      = Temp�ratures de l'air
+                                                                      = Pr�cipitations Neigeuses
+                                                                      = Pluies pour Pr�vision
+                                                                      = ETP pour Pr�vision
+                                                                      = Temp�ratures pour Pr�vision
+                                                                      = Pr�cipitations neigeuses pour Pr�vision
+                                                                      = Injections/Pompages
+                                                                      = Mailles m�t�o et Pond�rations
+

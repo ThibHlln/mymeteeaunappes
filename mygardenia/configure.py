@@ -2,6 +2,8 @@ import collections.abc
 import toml
 import os
 
+from ._convert import parse_rga_content, parse_gar_content
+
 
 def _create_branch(dictionary):
     branch = {}
@@ -103,6 +105,39 @@ class GardeniaTree(collections.abc.Mapping):
             self._root.update(toml.load(catchment))
         if settings:
             self._root.update(toml.load(settings))
+
+    @classmethod
+    def from_rga_gar(cls, rga: str, gar: str):
+        """Initialise a configuration tree from the RGA and GAR files
+        of Gardenia v8.8.
+
+        :Parameters:
+
+            rga: `str`, optional
+                The path to the RGA file containing the information about
+                the simulation data for the catchment to simulate.
+
+            gar: `str`, optional
+                The path to the GAR file containing the settings and
+                the parameters configuring the simulation with the
+                Gardenia model.
+
+        :Returns:
+
+            `GardeniaTree`
+
+        **Examples**
+
+        >>> t = GardeniaTree.from_rga_gar(
+        ...     rga='examples/my-example/config/exemple.rga',
+        ...     gar='examples/my-example/config/exemple.gar'
+        ... )
+        """
+        inst = cls()
+        inst.update(
+            parse_rga_content(rga) | parse_gar_content(gar)
+        )
+        return inst
 
     def __str__(self):
         return self._root.__str__()
