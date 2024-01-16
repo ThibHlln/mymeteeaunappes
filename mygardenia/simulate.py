@@ -11,6 +11,7 @@ from ._convert import (
     convert_to_rga_content, convert_to_gar_content
 )
 from .configure import GardeniaTree
+from .postprocess import evaluate, visualise
 
 
 def _manage_working_directory(working_dir: str):
@@ -302,60 +303,6 @@ class GardeniaModel(object):
                         index=False
                     )
 
-    def _trim_output_of_spin_up(self, df: pd.DataFrame):
-        # retrieve length of spin up run
-        spin_up = int(
-            self._tree['basin_settings']['model']
-            ['initialisation']['spinup']['n_years']
-        )
-
-        # subset in time to exclude spin up period
-        df = df[
-            df['dt'] >= (
-                    df['dt'].iloc[0] + pd.offsets.DateOffset(years=spin_up)
-            )
-        ]
-
-        return df
-
-    def _select_calib_or_eval_period(
-            self, df: pd.DataFrame, period: str = 'calib'
-    ):
-        # retrieve length of evaluation period
-        evaluation = int(
-            self._tree['basin_settings']['model']
-            ['calibration']['n_tail_years_to_trim']
-        )
-
-        if (period == 'eval') and (evaluation == 0):
-            raise RuntimeError(
-                "no data kept aside for an evaluation period"
-            )
-
-        # subset in time to exclude spin up period
-        if evaluation >= 0:
-            # it is a number of years that is provided (e.g. 5)
-            swap_date = (
-                df['dt'].iloc[-1] - pd.offsets.DateOffset(years=evaluation)
-            )
-        else:
-            # it is a year that is provided (e.g. -2024)
-            swap_date = (
-                pd.to_datetime(f'{-evaluation}-12-31')
-            )
-
-        if period == 'calib':
-            df = df[df['dt'] <= swap_date]
-        elif period == 'eval':
-            df = df[df['dt'] > swap_date]
-        else:
-            raise ValueError(
-                f"period {repr(period)} is not valid, "
-                f"it must either be 'calib' or 'eval'"
-            )
-
-        return df
-
     def evaluate(
             self, variable: str, metric: str, period: str = None,
             transform: str = None, exponent: float = None
@@ -410,32 +357,10 @@ class GardeniaModel(object):
         >>> m.evaluate('piezo_level', 'NSE', transform='sqrt')
         array(-436.91149994)
         """
-        if variable not in ['streamflow', 'piezo_level']:
-            raise ValueError(f"{repr(variable)} is not supported")
-
-        # collect relevant variable
-        df = getattr(self, variable)
-        if df is None:
-            raise ValueError(f"{repr(variable)} was not computed")
-
-        # subset in time to exclude spin up period
-        df = self._trim_output_of_spin_up(df)
-
-        # choose between the calibration period
-        # and a potential evaluation period
-        df = self._select_calib_or_eval_period(
-            df, period=(period if period else 'calib')
+        return evaluate(
+            working_dir=self._working_dir, variable=variable, metric=metric,
+            period=period, transform=transform, exponent=exponent
         )
-
-        # returned evaluation metric value
-        prefix = 'river' if variable == 'streamflow' else 'piezo'
-
-        return evalhyd.evald(
-            q_obs=df[f'{prefix}_obs'].values,
-            q_prd=df[f'{prefix}_sim'].values,
-            metrics=[metric],
-            transform=transform, exponent=exponent
-        )[0].squeeze()
 
     def visualise(
             self, variable: str, period: str = None,
@@ -490,55 +415,7 @@ class GardeniaModel(object):
         >>> m.visualise('streamflow', filename='my-debit.pdf')
         >>> m.visualise('piezo_level', filename='my-niveau.png')
         """
-        if variable not in ['streamflow', 'piezo_level']:
-            raise ValueError(f"{repr(variable)} is not supported")
-
-        # collect relevant variable
-        df = getattr(self, variable)
-        if df is None:
-            raise ValueError(f"{repr(variable)} was not computed")
-
-        # subset in time to exclude spin up period
-        df = self._trim_output_of_spin_up(df)
-
-        # choose between the calibration period
-        # and a potential evaluation period
-        df = self._select_calib_or_eval_period(
-            df, period=(period if period else 'calib')
+        visualise(
+            working_dir=self._working_dir, variable=variable, period=period,
+            filename=filename, fig_size=fig_size, return_fig=return_fig
         )
-
-        # generate plot
-        fig, ax = plt.subplots(
-            figsize=fig_size if fig_size else (10, 4)
-        )
-
-        prefix = 'river' if variable == 'streamflow' else 'piezo'
-
-        ax.plot(
-            df['dt'], df[f'{prefix}_obs'], label='observed',
-            marker='+', markersize=1.5, linestyle='-'
-        )
-        ax.plot(
-            df['dt'], df[f'{prefix}_sim'], label='simulated'
-        )
-
-        ax.set_xlabel('time')
-
-        ax.set_ylabel(
-            r'streamflow [m$^3$.s$^{-1}$]' if variable == 'streamflow'
-            else f'piezometric level [m NGF]'
-        )
-
-        ax.legend(frameon=False)
-
-        # save or show
-        if filename is not None:
-            fig.savefig(
-                os.sep.join([self._working_dir, "output", filename])
-            )
-        else:
-            plt.show()
-
-        # optionally return the figure
-        if return_fig:
-            return fig
