@@ -175,7 +175,7 @@ class GardeniaModel(object):
         with open(output_file, 'r') as f:
             n_lines = len(f.readlines())
 
-        if not bool(self._tree['general_settings']['forecast_run']):
+        if not bool(int(self._tree['general_settings']['forecast_run'])):
             # in simulation mode
             options = dict(
                 encoding='windows-1252',
