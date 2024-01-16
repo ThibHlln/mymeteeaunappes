@@ -53,6 +53,49 @@ def _rename_branch(branch, dictionary):
         )
 
 
+def _prune_tree(branch, lines, key_path):
+    for key, val in branch.items():
+
+        key_path = key if not key_path else '.'.join([key_path, key])
+
+        if isinstance(val, _GardeniaBranch):
+            if 'val' in val:
+                line = (
+                    f"{key_path} = {{"
+                    f"{', '.join([f'{k}={v}' for k, v in val.items()])}"
+                    f"}}"
+                )
+
+                if 'False' in line:
+                    line = line.replace('False', 'false')
+                elif 'True' in line:
+                    line = line.replace('True', 'true')
+
+                lines.append(line)
+            else:
+                _prune_tree(val, lines, key_path)
+        elif isinstance(val, bool):
+            lines.append(
+                f"{key_path} = {'true' if val else 'false'}"
+            )
+        elif isinstance(val, str):
+            lines.append(
+                f"{key_path} = {repr(val)}"
+            )
+        elif isinstance(val, (int, float)):
+            lines.append(
+                f"{key_path} = {val}"
+            )
+        else:
+            raise TypeError(
+                f"unsupported type for Gardenia setting {repr(key)}: {type(val)}"
+            )
+
+        key_path = '.'.join(key_path.split('.')[:-1])
+
+    return lines
+
+
 class GardeniaTree(collections.abc.Mapping):
     def __init__(self, catchment: str = None, settings: str = None):
         """Initialise a configuration tree gathering all the settings
@@ -138,6 +181,23 @@ class GardeniaTree(collections.abc.Mapping):
             parse_rga_content(rga) | parse_gar_content(gar)
         )
         return inst
+
+    def to_toml(self, working_dir: str):
+        """Update the existing values in the configuration tree.
+
+        :Parameters:
+
+            working_dir: `str`
+                The path to the working directory where a *config*
+                exists and in which the TOML file named *auto.toml*
+                will be saved.
+
+        :Returns:
+
+            `None`
+        """
+        with open(os.sep.join([working_dir, 'config', 'auto.toml']), 'w') as f:
+            f.write('\n'.join(_prune_tree(self._root, [], '')) + '\n')
 
     def __str__(self):
         return self._root.__str__()
