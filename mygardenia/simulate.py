@@ -4,8 +4,6 @@ import pathlib
 import re
 import glob
 import pandas as pd
-import evalhyd
-from matplotlib import pyplot as plt
 
 from ._convert import (
     convert_to_rga_content, convert_to_gar_content
@@ -372,12 +370,13 @@ class GardeniaModel(object):
                 'streamflow' or 'piezo_level'.
 
             period: `str`, optional
-                The period to consider for the computation of the evaluation
-                metric. It can either be 'calib' (only the period used for
-                calibration is considered, excluding the initialisation
-                period) or 'eval' (only the tail period left aside and not
-                used for the calibration is considered). If not provided,
-                set to default value 'calib'.
+                The period to consider for the visualisation. It can
+                either be 'calib' (only the period used for calibration
+                is considered, excluding the initialisation period) or
+                'eval' (only the tail period left aside and not used for
+                the calibration is considered). If not provided, set to
+                default value 'calib'. Note that for a forecast run, this
+                parameter is ignored.
 
             filename: `str`, optional
                 The file name to use for storing the visualisation. The
