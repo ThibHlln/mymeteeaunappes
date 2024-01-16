@@ -241,23 +241,20 @@ class GardeniaModel(object):
                     output_file,
                     skiprows=beg_river,
                     skipfooter=n_lines-end_river+span+2,
-                    encoding='windows-1252',
-                    engine='python', header=None,
-                    parse_dates=[0], date_format='%d/%m/%Y',
-                    names=['dt', 'river_sim', 'river_obs']
+                    names=['dt', 'river_sim', 'river_obs'],
+                    **options
                 )
                 
                 df_river_btm = pd.read_table(
                     output_file,
                     skiprows=end_river-span-1,
                     skipfooter=n_lines-end_river,
-                    names=['dt', 'unused', 'river_sim', 'river_obs',
+                    names=['dt', 'river_sim', 'river_obs',
                            'river_frc_no-rain', 'river_frc_10%-dry',
                            'river_frc_20%-dry', 'river_frc_50%',
                            'river_frc_20%-wet', 'river_frc_10%-wet'],
                     **options
                 )
-                df_river_btm = df_river_btm.drop('unused', axis=1)
 
                 df_river = pd.concat([df_river_top, df_river_btm], axis=0)
 
@@ -273,24 +270,22 @@ class GardeniaModel(object):
             if beg_piezo and end_piezo:
                 df_piezo_top = pd.read_table(
                     output_file,
-                    skiprows=beg_piezo, skipfooter=n_lines-end_piezo+span+2,
-                    encoding='windows-1252',
-                    engine='python', header=None,
-                    parse_dates=[0], date_format='%d/%m/%Y',
-                    names=['dt', 'piezo_sim', 'piezo_obs']
+                    skiprows=beg_piezo,
+                    skipfooter=n_lines-end_piezo+span+2,
+                    names=['dt', 'piezo_sim', 'piezo_obs'],
+                    **options
                 )
                 
                 df_piezo_btm = pd.read_table(
                     output_file,
                     skiprows=end_piezo-span-1,
                     skipfooter=n_lines-end_piezo,
-                    names=['dt', 'unused', 'piezo_sim', 'piezo_obs',
+                    names=['dt', 'piezo_sim', 'piezo_obs',
                            'piezo_frc_no-rain', 'piezo_frc_10%-dry',
                            'piezo_frc_20%-dry', 'piezo_frc_50%',
                            'piezo_frc_20%-wet', 'piezo_frc_10%-wet'],
                     **options
                 )
-                df_piezo_btm = df_piezo_btm.drop('unused', axis=1)
                 
                 df_piezo = pd.concat([df_piezo_top, df_piezo_btm], axis=0)
 
