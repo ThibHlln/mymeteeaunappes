@@ -152,9 +152,9 @@ def plot_simulation_history(
     else:
         colors = plt.get_cmap(
             'Blues' if variable == 'streamflow' else 'Purples',
-            len(versions)
+            len(versions) + 1
         )
-        colors = [colors(i) for i in range(len(versions))]
+        colors = [colors(i) for i in range(1, len(versions) + 1)]
 
     for i, version in enumerate(versions):
         ax.plot(
