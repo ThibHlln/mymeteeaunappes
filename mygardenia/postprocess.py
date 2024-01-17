@@ -240,7 +240,6 @@ def visualise(
 
     tree = GardeniaTree(catchment=auto_toml, settings=auto_toml)
 
-    tree['general_settings']['forecast_run'] = False
     if not bool(int(tree['general_settings']['forecast_run'])):
         # in simulation mode
         # collect relevant variable
