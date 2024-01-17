@@ -59,7 +59,7 @@ def _prune_tree(branch, lines, key_path):
         key_path = key if not key_path else '.'.join([key_path, key])
 
         if isinstance(val, _GardeniaBranch):
-            if 'val' in val:
+            if ('val' in val) or ('min' in val):
                 line = (
                     f"{key_path} = {{"
                     f"{', '.join([f'{k}={v}' for k, v in val.items()])}"
