@@ -38,9 +38,9 @@ general_settings.computation_scheme = "0"
 general_settings.transform_calibration_data = "0"
 
 # Calcul avec Prévision (0=Non ; 1=Oui ; -1=Préparation uniquement) [3, 4 = Particulier]
-general_settings.forecast_run = false
+general_settings.forecast_run = true
 # Méthode de Prévision (0=Ajustement Réservoirs ; 1=Décalage avec 1/2 vie)
-general_settings.forecast_method = "0"
+general_settings.forecast_method = "1"
 
 # Schéma d'échanges souterr. avec extérieur (0=% Débit Souterr. (++) ; 1=Facteur Niv_Souterr.)
 general_settings.underground_exchange_scheme = "0"
@@ -92,7 +92,7 @@ forecast_settings.half-life_fall_piezo-level_forecast = 0.0
 # BASIN SETTINGS
 # -----------------------------------------------------------------------------
 # Nombre d'années des séries de données (Pluie, ETP, Observations) [0 => Toutes]
-basin_settings.time.simulation.n_years_in_data = 18
+basin_settings.time.simulation.n_years_in_data = 0
 # Date de la première année des données (par ex. 2017)
 basin_settings.time.simulation.first_year = 1985
 # Numéro du Mois initial [Déf=1] (si durée non-standard) ; ex. 12 pour décembre
@@ -101,16 +101,16 @@ basin_settings.time.simulation.first_month = 0
 basin_settings.time.simulation.first_day = 0
 
 # Nombre d'années de données du fichier de pluies etc. pour la prévision
-basin_settings.time.forecast.n_years_in_data = 0
+basin_settings.time.forecast.n_years_in_data = 18
 # Date de la Première Année des fichiers météo de prévision [si journalier] (déf = 0)
-basin_settings.time.forecast.first_year = 0
+basin_settings.time.forecast.first_year = 2003
 # Numéro du mois [si journalier ou mensuel] (ou n° du pas de temps) d'émission de la prévision
-basin_settings.time.forecast.issue_month = 0
+basin_settings.time.forecast.issue_month = 4
 # Jour d'émission de la prévision (1-31) si pas de temps journalier (sinon : 0)
-basin_settings.time.forecast.issue_day = 0
+basin_settings.time.forecast.issue_day = 1
 
 # Portée de la prévision (en nombre de pas de temps de prévision)
-basin_settings.time.forecast.span = 0
+basin_settings.time.forecast.span = 90
 
 # Numéro de l'année utilisée pour les pompages pendant la prévision (ex. 2019) Déf 0 => Avant-dernière
 basin_settings.time.forecast.pumping_year = 0
@@ -124,9 +124,9 @@ basin_settings.model.initialisation.spinup.n_years = 4
 basin_settings.model.initialisation.spinup.n_cycles = 1
 
 # Nombre d'années finales à ignorer pour la calibration (déf = 0) [< 0 => n° de la dernière année]
-basin_settings.model.calibration.n_tail_years_to_trim = 3
+basin_settings.model.calibration.n_tail_years_to_trim = 0
 # Nombre maximum d'itérations pour la calibration (0 = aucune itération, pas de calibration)
-basin_settings.model.calibration.max_iterations = 250
+basin_settings.model.calibration.max_iterations = 500
 
 # Nombre de réservoirs souterrains (1 ou 2 ou -1=Réservoir double avec seuil)   [déf = 1]
 basin_settings.model.structure.n_groundwater_reservoirs = 1
@@ -146,7 +146,7 @@ basin_settings.model.structure.storage_coefficient_computation_scheme = "0"
 # PHYSICAL PARAMETERS
 # -----------------------------------------------------------------------------
 # Pluie Eff. annuelle pour initialis. (0=équil.) (mm/an)
-physical_parameters.annual_effective-rainfall = {val=0.0}
+physical_parameters.annual_effective-rainfall = {val=300.0}
 # Débit extérieur éventuel                        (m3/s)
 physical_parameters.external_flow = {val=0.0, opt=false}
 # Superficie du bassin versant                     (km2)
@@ -162,13 +162,13 @@ physical_parameters.basin_area_correction = {val=1.0, opt=false, min=0.02, max=5
 # Capacité du réservoir sol 'réserve utile'         (mm)   [RUMAX]
 physical_parameters.thornthewaite_reservoir_capacity = {val=0.0, opt=false, min=0.0, max=500.0}
 # Capacité du réservoir sol progressif              (mm)   [Sx]
-physical_parameters.progressive_reservoir_capacity = {val=180.0, opt=true, min=0.0, max=650.0}
+physical_parameters.progressive_reservoir_capacity = {val=431.25940, opt=false, min=0.0, max=650.0}
 # Hauteur de répartition Ruissellement-Percolation  (mm)   [RUIPER]
-physical_parameters.intermediate_runoff_seepage = {val=600.0, opt=true, min=1.0, max=9999.0}
+physical_parameters.intermediate_runoff_seepage = {val=334.12203, opt=false, min=1.0, max=9999.0}
 # Temps de 1/2 percolation vers la nappe          (mois)   [THG]
-physical_parameters.intermediate_half-life_seepage = {val=5.0, opt=true, min=0.15, max=25.0}
+physical_parameters.intermediate_half-life_seepage = {val=1.94348, opt=false, min=0.15, max=25.0}
 # Temps de 1/2 tarissement du débit souterr. n°1  (mois)   [TG1]
-physical_parameters.groundwater_1_drainage = {val=20.0, opt=true, min=6.0, max=70.0}
+physical_parameters.groundwater_1_drainage = {val=18.97860, opt=false, min=6.0, max=70.0}
 # Temps de 1/2 transfert vers la nappe profonde   (mois)   [TG12]
 physical_parameters.groundwater_1_2_exchange = {val=0.0, opt=false, min=0.05, max=50.0}
 # Seuil d'écoulement souterrain n°1 (rés. double)   (mm)   [SEUIL]
@@ -194,9 +194,9 @@ physical_parameters.intermediate_half-life_runoff_by_overspill = {val=0.0, opt=f
 physical_parameters.intermediate_half-life_max_runoff_decrease = {val=0.0, opt=false, min=0.0001, max=1000.0}
 
 # Niveau de base local de la nappe               (m NGF)   [NB]
-physical_parameters.groundwater_base_level = {val=0.0, opt=true}
+physical_parameters.groundwater_base_level = {val=137.81459, opt=false}
 # Coefficient d'emmagasinement de la nappe           (%)   [SG]
-physical_parameters.groundwater_storage_coefficient = {val=1.0, opt=true, min=0.5, max=35.0}
+physical_parameters.groundwater_storage_coefficient = {val=1.38221, opt=false, min=0.5, max=35.0}
 
 # Correction globale de la température              (°C)
 physical_parameters.air-temp_correction = {val=0.0, opt=false, min=-3.0, max=3.0}
