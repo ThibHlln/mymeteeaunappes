@@ -356,7 +356,7 @@ class GardeniaModel(object):
         )
 
     def visualise(
-            self, variable: str, period: str = None,
+            self, variable: str, period: str = None, depth: int = None,
             filename: str = None, fig_size: tuple = None,
             return_fig: bool = False
     ):
@@ -377,6 +377,12 @@ class GardeniaModel(object):
                 the calibration is considered). If not provided, set to
                 default value 'calib'. Note that for a forecast run, this
                 parameter is ignored.
+
+            depth: `int`, optional
+                The number of days to consider for the visualisation of
+                a forecast run (including the forecast span). If not
+                provided, only the forecast span is displayed. Note that
+                for a simulation run, this parameter is ignored.
 
             filename: `str`, optional
                 The file name to use for storing the visualisation. The
@@ -410,6 +416,7 @@ class GardeniaModel(object):
         >>> m.visualise('piezo_level', filename='my-niveau.png')
         """
         visualise(
-            working_dir=self._working_dir, variable=variable, period=period,
+            working_dir=self._working_dir, variable=variable,
+            period=period, depth=depth,
             filename=filename, fig_size=fig_size, return_fig=return_fig
         )

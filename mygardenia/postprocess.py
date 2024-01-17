@@ -62,6 +62,19 @@ def _select_calib_or_eval_period(
     return df
 
 
+def _select_forecast_period(
+        df: pd.DataFrame, span: int, depth: int = None
+):
+    # subset in time to keep only forecast period or given depth
+    df = df[
+        df['dt'] > df['dt'].iloc[-1] - pd.offsets.DateOffset(
+            days=depth if depth else span
+        )
+    ]
+
+    return df
+
+
 def evaluate(
         working_dir: str, variable: str, metric: str, period: str = None,
         transform: str = None, exponent: float = None
@@ -157,8 +170,8 @@ def evaluate(
 
 def visualise(
         working_dir: str, variable: str, period: str = None,
-        filename: str = None, fig_size: tuple = None,
-        return_fig: bool = False
+        depth: int = None, filename: str = None,
+        fig_size: tuple = None, return_fig: bool = False
 ):
     """Visualise the simulations and the observations time series
     for a given variable.
@@ -174,12 +187,18 @@ def visualise(
             'streamflow' or 'piezo_level'.
 
         period: `str`, optional
-            The period to consider for the computation of the evaluation
-            metric. It can either be 'calib' (only the period used for
-            calibration is considered, excluding the initialisation
-            period) or 'eval' (only the tail period left aside and not
-            used for the calibration is considered). If not provided,
-            set to default value 'calib'.
+            The period to consider for the visualisation. It can either
+            be 'calib' (only the period used for calibration is considered,
+            excluding the initialisation period) or 'eval' (only the tail
+            period left aside and not used for the calibration is considered).
+            If not provided, set to default value 'calib'. Note that for a
+            forecast run, this parameter is ignored.
+
+        depth: `int`, optional
+            The number of days to consider for the visualisation of a
+            forecast run (including the forecast span). If not provided,
+            only the forecast span is displayed. Note that for a simulation
+            run, this parameter is ignored.
 
         filename: `str`, optional
             The file name to use for storing the visualisation. The
@@ -221,42 +240,106 @@ def visualise(
 
     tree = GardeniaTree(catchment=auto_toml, settings=auto_toml)
 
-    # collect relevant variable
-    df = pd.read_csv(
-        os.sep.join([working_dir, 'output', f'{prefix}_sim_obs.csv']),
-        parse_dates=['dt']
-    )
+    tree['general_settings']['forecast_run'] = False
+    if not bool(int(tree['general_settings']['forecast_run'])):
+        # in simulation mode
+        # collect relevant variable
+        df = pd.read_csv(
+            os.sep.join([working_dir, 'output', f'{prefix}_sim_obs.csv']),
+            parse_dates=['dt']
+        )
 
-    # subset in time to exclude spin up period
-    df = _trim_output_of_spin_up(df, tree)
+        # subset in time to exclude spin up period
+        df = _trim_output_of_spin_up(df, tree)
 
-    # choose between the calibration period
-    # and a potential evaluation period
-    df = _select_calib_or_eval_period(
-        df, tree, period=(period if period else 'calib')
-    )
+        # choose between the calibration period
+        # and a potential evaluation period
+        df = _select_calib_or_eval_period(
+            df, tree, period=(period if period else 'calib')
+        )
 
-    # generate plot
-    fig, ax = plt.subplots(
-        figsize=fig_size if fig_size else (10, 4)
-    )
+        # generate plot
+        fig, ax = plt.subplots(
+            figsize=fig_size if fig_size else (10, 4)
+        )
 
-    ax.plot(
-        df['dt'], df[f'{prefix}_obs'], label='observed',
-        marker='+', markersize=1.5, linestyle='-'
-    )
-    ax.plot(
-        df['dt'], df[f'{prefix}_sim'], label='simulated'
-    )
+        ax.plot(
+            df['dt'], df[f'{prefix}_obs'], label='observed',
+            marker='+', markersize=1.5, linestyle='-',
+            color='black'
+        )
+        ax.plot(
+            df['dt'], df[f'{prefix}_sim'], label='simulated',
+            color='tab:blue' if variable == 'streamflow' else 'tab:purple'
+        )
 
-    ax.set_xlabel('time')
+        ax.set_xlabel('time')
 
-    ax.set_ylabel(
-        r'streamflow [m$^3$.s$^{-1}$]' if variable == 'streamflow'
-        else f'piezometric level [m NGF]'
-    )
+        ax.set_ylabel(
+            r'streamflow [m$^3$.s$^{-1}$]' if variable == 'streamflow'
+            else f'piezometric level [m NGF]'
+        )
 
-    ax.legend(frameon=False)
+        ax.legend(frameon=False)
+    else:
+        # in forecast mode
+        # collect relevant variable
+        df = pd.read_csv(
+            os.sep.join([working_dir, 'output', f'{prefix}_sim_obs_frc.csv']),
+            parse_dates=['dt']
+        )
+
+        # subset in time
+        span = int(tree['basin_settings']['time']['forecast']['span'])
+
+        df = _select_forecast_period(df, span, depth)
+
+        # choose between the calibration period
+        # and a potential evaluation period
+        df = _select_calib_or_eval_period(
+            df, tree, period=(period if period else 'calib')
+        )
+
+        # generate plot
+        fig, ax = plt.subplots(
+            figsize=fig_size if fig_size else (10, 4)
+        )
+
+        ax.plot(
+            df['dt'], df[f'{prefix}_obs'], label='observed',
+            marker='+', markersize=1.5, linestyle='-',
+            color='black'
+        )
+
+        if depth:
+            if depth > span:
+                ax.plot(
+                    df['dt'], df[f'{prefix}_sim'], label='simulated',
+                    color=(
+                        'tab:blue' if variable == 'streamflow'
+                        else 'tab:purple'
+                    )
+                )
+
+        colors = plt.get_cmap('Greens', 7)
+
+        for i, scn in enumerate(
+                ['no-rain', '10%-dry', '20%-dry', '50%', '20%-wet', '10%-wet'],
+                start=1
+        ):
+            ax.plot(
+                df['dt'], df[f'{prefix}_frc_{scn}'], label=f'forecast {scn}',
+                color=colors(i)
+            )
+
+        ax.set_xlabel('time')
+
+        ax.set_ylabel(
+            r'streamflow [m$^3$.s$^{-1}$]' if variable == 'streamflow'
+            else f'piezometric level [m NGF]'
+        )
+
+        ax.legend(frameon=False)
 
     # save or show
     if filename is not None:
@@ -269,5 +352,3 @@ def visualise(
     # optionally return the figure
     if return_fig:
         return fig
-
-
