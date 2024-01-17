@@ -126,7 +126,7 @@ basin_settings.model.initialisation.spinup.n_cycles = 1
 # Nombre d'années finales à ignorer pour la calibration (déf = 0) [< 0 => n° de la dernière année]
 basin_settings.model.calibration.n_tail_years_to_trim = 0
 # Nombre maximum d'itérations pour la calibration (0 = aucune itération, pas de calibration)
-basin_settings.model.calibration.max_iterations = 450
+basin_settings.model.calibration.max_iterations = 250
 
 # Nombre de réservoirs souterrains (1 ou 2 ou -1=Réservoir double avec seuil)   [déf = 1]
 basin_settings.model.structure.n_groundwater_reservoirs = 1
@@ -162,13 +162,13 @@ physical_parameters.basin_area_correction = {val=1.0, opt=false, min=0.02, max=5
 # Capacité du réservoir sol 'réserve utile'         (mm)   [RUMAX]
 physical_parameters.thornthewaite_reservoir_capacity = {val=0.0, opt=false, min=0.0, max=500.0}
 # Capacité du réservoir sol progressif              (mm)   [Sx]
-physical_parameters.progressive_reservoir_capacity = {val=150.0, opt=true, min=0.0, max=650.0}
+physical_parameters.progressive_reservoir_capacity = {val=180.0, opt=true, min=0.0, max=650.0}
 # Hauteur de répartition Ruissellement-Percolation  (mm)   [RUIPER]
-physical_parameters.intermediate_runoff_seepage = {val=50.0, opt=true, min=1.0, max=9999.0}
+physical_parameters.intermediate_runoff_seepage = {val=600.0, opt=true, min=1.0, max=9999.0}
 # Temps de 1/2 percolation vers la nappe          (mois)   [THG]
-physical_parameters.intermediate_half-life_seepage = {val=0.5, opt=true, min=0.05, max=10.0}
+physical_parameters.intermediate_half-life_seepage = {val=5.0, opt=true, min=0.15, max=25.0}
 # Temps de 1/2 tarissement du débit souterr. n°1  (mois)   [TG1]
-physical_parameters.groundwater_1_drainage = {val=3.0, opt=true, min=0.05, max=15.0}
+physical_parameters.groundwater_1_drainage = {val=20.0, opt=true, min=6.0, max=70.0}
 # Temps de 1/2 transfert vers la nappe profonde   (mois)   [TG12]
 physical_parameters.groundwater_1_2_exchange = {val=0.0, opt=false, min=0.05, max=50.0}
 # Seuil d'écoulement souterrain n°1 (rés. double)   (mm)   [SEUIL]
@@ -194,9 +194,9 @@ physical_parameters.intermediate_half-life_runoff_by_overspill = {val=0.0, opt=f
 physical_parameters.intermediate_half-life_max_runoff_decrease = {val=0.0, opt=false, min=0.0001, max=1000.0}
 
 # Niveau de base local de la nappe               (m NGF)   [NB]
-physical_parameters.groundwater_base_level = {val=0.0, opt=false}
+physical_parameters.groundwater_base_level = {val=0.0, opt=true}
 # Coefficient d'emmagasinement de la nappe           (%)   [SG]
-physical_parameters.groundwater_storage_coefficient = {val=0.0, opt=false, min=0.5, max=35.0}
+physical_parameters.groundwater_storage_coefficient = {val=1.0, opt=true, min=0.5, max=35.0}
 
 # Correction globale de la température              (°C)
 physical_parameters.air-temp_correction = {val=0.0, opt=false, min=-3.0, max=3.0}
