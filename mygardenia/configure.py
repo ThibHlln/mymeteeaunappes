@@ -182,21 +182,27 @@ class GardeniaTree(collections.abc.Mapping):
         )
         return inst
 
-    def to_toml(self, working_dir: str):
+    def to_toml(self, filepath: str, filename: str = None):
         """Update the existing values in the configuration tree.
 
         :Parameters:
 
-            working_dir: `str`
-                The path to the working directory where a *config*
-                exists and in which the TOML file named *auto.toml*
+            filepath: `str`
+                The path to the working directory where the TOML file
                 will be saved.
+
+            filename: `str`, optional
+                The name for the TOML file. If not provided, the file
+                will be named *auto.toml*.
 
         :Returns:
 
             `None`
         """
-        with open(os.sep.join([working_dir, 'config', 'auto.toml']), 'w') as f:
+        with open(
+                os.sep.join([filepath, filename if filename else 'auto.toml']),
+                'w'
+        ) as f:
             f.write('\n'.join(_prune_tree(self._root, [], '')) + '\n')
 
     def __str__(self):

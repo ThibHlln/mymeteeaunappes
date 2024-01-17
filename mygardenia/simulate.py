@@ -6,7 +6,8 @@ import glob
 import pandas as pd
 
 from ._convert import (
-    convert_to_rga_content, convert_to_gar_content
+    convert_to_rga_content, convert_to_gar_content,
+    parse_gar_content
 )
 from .configure import GardeniaTree
 from .postprocess import evaluate, visualise
@@ -15,17 +16,17 @@ from .postprocess import evaluate, visualise
 def _manage_working_directory(working_dir: str):
     # create working directory and 'config' subdirectory if they do not exist
     (
-        pathlib.Path(os.sep.join([working_dir, 'config']))
+        pathlib.Path(os.path.join(working_dir, 'config'))
         .mkdir(parents=True, exist_ok=True)
     )
     # create working directory and 'data' subdirectory if they do not exist
     (
-        pathlib.Path(os.sep.join([working_dir, 'data']))
+        pathlib.Path(os.path.join(working_dir, 'data'))
         .mkdir(parents=True, exist_ok=True)
     )
     # create working directory and 'output' subdirectory if they do not exist
     (
-        pathlib.Path(os.sep.join([working_dir, 'output']))
+        pathlib.Path(os.path.join(working_dir, 'output'))
         .mkdir(parents=True, exist_ok=True)
     )
 
@@ -120,7 +121,7 @@ class GardeniaModel(object):
         # ---------------------------------------------------------------------
         # generate *.toml file
         # ---------------------------------------------------------------------
-        self._tree.to_toml(self._working_dir)
+        self._tree.to_toml(filepath=os.path.join(self._working_dir, 'config'))
 
         # ---------------------------------------------------------------------
         # run gardenia model
@@ -143,15 +144,30 @@ class GardeniaModel(object):
         for f in glob.glob(f'{self._working_dir}{os.sep}*.*'):
             filename = f.split(os.sep)[-1]
             os.replace(
-                os.sep.join([self._working_dir, filename]),
-                os.sep.join([self._working_dir, 'output', filename])
+                os.path.join(self._working_dir, filename),
+                os.path.join(self._working_dir, 'output', filename)
             )
+
+        # ---------------------------------------------------------------------
+        # generate a *.toml file from the *.out file
+        # ---------------------------------------------------------------------
+        gar_file = os.path.join(
+            self._working_dir, 'output', "gardepara.out"
+        )
+
+        gar_tree = GardeniaTree()
+        gar_tree.update(parse_gar_content(gar_file))
+
+        gar_tree.to_toml(
+            filepath=os.path.join(self._working_dir, 'output'),
+            filename='keep.toml'
+        )
 
         # ---------------------------------------------------------------------
         # post-process outputs if they exist
         # ---------------------------------------------------------------------
-        output_file = os.sep.join(
-            [self._working_dir, 'output', "gardesim.prn"]
+        output_file = os.path.join(
+            self._working_dir, 'output', "gardesim.prn"
         )
 
         if save_outputs and not pathlib.Path(output_file).is_file():
