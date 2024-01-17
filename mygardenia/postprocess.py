@@ -68,7 +68,7 @@ def _select_forecast_period(
     # subset in time to keep only forecast period or given depth
     df = df[
         df['dt'] > df['dt'].iloc[-1] - pd.offsets.DateOffset(
-            days=depth if depth else span
+            days=depth if depth else span + 1
         )
     ]
 
