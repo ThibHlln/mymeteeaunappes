@@ -1,7 +1,16 @@
 import os
+import pathlib
 from glob import glob
 import pandas as pd
 import matplotlib.pyplot as plt
+
+
+def _manage_history_directory(history_dir: str):
+    # create history directory and 'output' subdirectory if they do not exist
+    (
+        pathlib.Path(os.sep.join([history_dir, 'output']))
+        .mkdir(parents=True, exist_ok=True)
+    )
 
 
 def _collect_list_working_dirs(
@@ -171,6 +180,8 @@ def plot_simulation_history(
 
     # save or show
     if plot_filename is not None:
+        _manage_history_directory(history_dir)
+        
         fig.savefig(
             os.sep.join([history_dir, "output", plot_filename])
         )
