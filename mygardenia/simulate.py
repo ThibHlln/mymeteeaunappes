@@ -183,13 +183,13 @@ class GardeniaModel(object):
 
         with open(output_file, 'r') as f:
             for i, line in enumerate(f):
-                if re.compile(r'Fin :.*: Débit_Riv').findall(line):
+                if re.compile(r'Fin :.*: Débit_Riv\n').findall(line):
                     end_river = i
-                elif re.compile(r': Débit_Riv').findall(line):
+                elif re.compile(r': Débit_Riv\n').findall(line):
                     beg_river = i + 1
-                elif re.compile(r'Fin :.*: Niveau_Aquif').findall(line):
+                elif re.compile(r'Fin :.*: Niveau_Aquif\n').findall(line):
                     end_piezo = i
-                elif re.compile(r': Niveau_Aquif').findall(line):
+                elif re.compile(r': Niveau_Aquif\n').findall(line):
                     beg_piezo = i + 1
 
         with open(output_file, 'r') as f:
