@@ -431,7 +431,7 @@ class GardeniaModel(object):
         >>> m.visualise('streamflow', filename='my-debit.pdf')
         >>> m.visualise('piezo_level', filename='my-niveau.png')
         """
-        visualise(
+        return visualise(
             working_dir=self._working_dir, variable=variable,
             period=period, depth=depth,
             filename=filename, fig_size=fig_size, return_fig=return_fig
