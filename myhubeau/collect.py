@@ -229,7 +229,7 @@ def get_hydrometry(
         keep_quality_values: `bool`, optional
             The list of quality values in the field *code_qualification*
             where to keep the time steps. Relevant values are `12` ("dubious"),
-            `16` ("correct"), and `20` ("good") .If not provided, quality
+            `16` ("correct"), and `20` ("good"). If not provided, quality
             values `16` and `20` are kept.
 
     :Returns:
@@ -346,7 +346,8 @@ def _set_and_get_piezometry_stations() -> list:
 
 
 def get_piezometry(
-        code_bss: str, include_realtime: bool = True
+        code_bss: str, include_realtime: bool = True,
+        keep_quality_values: list = None
 ) -> pd.DataFrame | None:
     """Collect entire record of observed piezometric data for a given
     station (in metres NGF) from ADES via Hub'Eau.
@@ -361,6 +362,11 @@ def get_piezometry(
             Whether to include real-time data (if available) and
             aggregate it with consolidated data. If not provided,
             set to default value `True`.
+
+        keep_quality_values: `bool`, optional
+            The list of quality values in the field *qualification*
+            where to keep the time steps. If not provided, quality values
+            `Correcte` are kept.
 
     :Returns:
 
@@ -408,7 +414,10 @@ def get_piezometry(
         date_field='date_mesure', date_format='%Y-%m-%d',
         date_label=date_label,
         measure_field='niveau_nappe_eau', measure_label=measure_label,
-        quality_field='qualification', good_quality_values=['Correcte']
+        quality_field='qualification',
+        good_quality_values=(
+            keep_quality_values if keep_quality_values else ['Correcte']
+        )
     )
 
     data_tr = None

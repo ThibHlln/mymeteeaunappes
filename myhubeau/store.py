@@ -100,7 +100,7 @@ def save_hydrometry(
         keep_quality_values: `bool`, optional
             The list of quality values in the field *code_qualification*
             where to keep the time steps. Relevant values are `12` ("dubious"),
-            `16` ("correct"), and `20` ("good") .If not provided, quality values
+            `16` ("correct"), and `20` ("good"). If not provided, quality values
             `16` and `20` are kept.
 
     :Returns:
@@ -158,7 +158,8 @@ def save_piezometry(
         code_bss: str, working_dir: str,
         filename: str = None,
         start: str = None, end: str = None,
-        include_realtime: bool = True
+        include_realtime: bool = True,
+        keep_quality_values: list = None
 ):
     """Generate a PRN file containing the observed piezometric data
     for a given station.
@@ -193,6 +194,11 @@ def save_piezometry(
             aggregate it with consolidated data. If not provided,
             set to default value `True`.
 
+        keep_quality_values: `bool`, optional
+            The list of quality values in the field *qualification*
+            where to keep the time steps. If not provided, quality values
+            `Correcte` are kept.
+
     :Returns:
 
         `None`
@@ -209,7 +215,7 @@ def save_piezometry(
     """
     # collect data as dataframe
     df = get_piezometry(
-        code_bss, include_realtime
+        code_bss, include_realtime, keep_quality_values
     )
 
     # store as PRN file
