@@ -188,6 +188,8 @@ def plot_simulation_history(
     else:
         plt.show()
 
+    plt.close()
+
     # optionally return the figure
     if return_fig:
         return fig

@@ -300,3 +300,5 @@ def plot_time_series(
         )
     else:
         plt.show()
+
+    plt.close()

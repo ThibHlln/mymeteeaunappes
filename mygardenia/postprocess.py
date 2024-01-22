@@ -18,7 +18,7 @@ def _trim_output_of_spin_up(df: pd.DataFrame, tree: GardeniaTree):
         df['dt'] >= (
                 df['dt'].iloc[0] + pd.offsets.DateOffset(years=spin_up)
         )
-        ]
+    ]
 
     return df
 
@@ -347,6 +347,8 @@ def visualise(
         )
     else:
         plt.show()
+
+    plt.close()
 
     # optionally return the figure
     if return_fig:
