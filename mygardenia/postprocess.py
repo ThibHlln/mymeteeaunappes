@@ -171,7 +171,8 @@ def evaluate(
 def visualise(
         working_dir: str, variable: str, period: str = None,
         depth: int = None, filename: str = None,
-        fig_size: tuple = None, return_fig: bool = False
+        fig_size: tuple = None, colors: list = None,
+        return_fig: bool = False
 ):
     """Visualise the simulations and the observations time series
     for a given variable.
@@ -209,6 +210,13 @@ def visualise(
         fig_size: `tuple`, optional
             The width and the height of the figure as a tuple.
             If not provided, set to (10, 4).
+
+        colors: `list`, optional
+            The list of colors to use for displaying the different
+            forecasts. It must be the name length and order as the
+            forecasts (i.e. 6, no-rain 10%-dry, 20%-dry, 50%, 20%-wet,
+            10%-wet). If not provided, a shade of green is used. Note,
+            this parameter is only used in case of a forecast run.
 
         return_fig: `bool`, optional
             Whether to return the figure object used to generate the
@@ -320,15 +328,19 @@ def visualise(
                     )
                 )
 
-        colors = plt.get_cmap('Greens', 7)
+        if not colors:
+            colors = plt.get_cmap('Greens', 7)
+            colors = [colors(i) for i in range(1, 8)]
+        else:
+            if len(colors) != 6:
+                raise RuntimeError('number of colors not equal to 6')
 
         for i, scn in enumerate(
-                ['no-rain', '10%-dry', '20%-dry', '50%', '20%-wet', '10%-wet'],
-                start=1
+                ['no-rain', '10%-dry', '20%-dry', '50%', '20%-wet', '10%-wet']
         ):
             ax.plot(
                 df['dt'], df[f'{prefix}_frc_{scn}'], label=f'forecast {scn}',
-                color=colors(i)
+                color=colors[i]
             )
 
         ax.set_xlabel('time')

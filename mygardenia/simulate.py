@@ -374,7 +374,7 @@ class GardeniaModel(object):
     def visualise(
             self, variable: str, period: str = None, depth: int = None,
             filename: str = None, fig_size: tuple = None,
-            return_fig: bool = False
+            colors: list = None, return_fig: bool = False
     ):
         """Visualise the simulations and the observations time series
         for a given variable.
@@ -410,6 +410,14 @@ class GardeniaModel(object):
                 The width and the height of the figure as a tuple.
                 If not provided, set to (10, 4).
 
+            colors: `list`, optional
+                The list of colors to use for displaying the different
+                forecasts. It must be the name length and order as the
+                forecasts (i.e. 6, no-rain 10%-dry, 20%-dry, 50%,
+                20%-wet, 10%-wet). If not provided, a shade of green is
+                used. Note, this parameter is only used in case of a
+                forecast run.
+
             return_fig: `bool`, optional
                 Whether to return the figure object used to generate the
                 plot. If not provided, it is not returned.
@@ -434,5 +442,6 @@ class GardeniaModel(object):
         return visualise(
             working_dir=self._working_dir, variable=variable,
             period=period, depth=depth,
-            filename=filename, fig_size=fig_size, return_fig=return_fig
+            filename=filename, fig_size=fig_size, colors=colors,
+            return_fig=return_fig
         )
