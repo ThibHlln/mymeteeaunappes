@@ -212,7 +212,7 @@ def _collect_prn_history(
         header=header, skiprows=skip_top, skipfooter=skip_bottom,
         engine='python'
     )
-    df = df.iloc[:, skip_left:-skip_right]
+    df = df.iloc[[0], skip_left:-skip_right]
     df.index = [f'V{versions[0]}']
 
     for working_dir, version in zip(working_dirs[1:], versions[1:]):
@@ -222,7 +222,8 @@ def _collect_prn_history(
             header=header, skiprows=skip_top, skipfooter=skip_bottom,
             engine='python'
         )
-        df_ = df_.iloc[:, skip_left:-skip_right]
+        df_ = df_.iloc[[0], skip_left:-skip_right]
+
         df_.index = [f'V{version}']
 
         df = pd.concat([df, df_], axis=0)
