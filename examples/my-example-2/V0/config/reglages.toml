@@ -112,9 +112,6 @@ basin_settings.time.forecast.issue_day = 0
 # Portée de la prévision (en nombre de pas de temps de prévision)
 basin_settings.time.forecast.span = 90
 
-# Numéro de l'année utilisée pour les pompages pendant la prévision (ex. 2019) Déf 0 => Avant-dernière
-basin_settings.time.forecast.pumping_year = 0
-
 # État initial : 0=Pluie Efficace moyenne ; -1=Réservoirs vides ; -2=RuMax vide aussi
 basin_settings.model.initialisation.antecedent_conditions = 0
 

@@ -191,9 +191,6 @@ basin_settings.time.forecast.issue_day = 0
 # Portée de la prévision (en nombre de pas de temps de prévision)
 basin_settings.time.forecast.span = 0
 
-# Numéro de l'année utilisée pour les pompages pendant la prévision (ex. 2019) Déf 0 => Avant-dernière
-basin_settings.time.forecast.pumping_year = 0
-
 # Décalage dans la série des Pluies [+5 => Retarde de 5 pas ; -4 Avance de 4 pas]
 basin_settings.time.delay_in_rainfall_data = 0
 # Décalage de la série des Débits/Niveaux observés [ex: -2 => Avance de 2 pas]
