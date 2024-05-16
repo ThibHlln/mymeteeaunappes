@@ -181,7 +181,7 @@ class GardeniaModel(object):
         beg_piezo = None
         end_piezo = None
 
-        with open(output_file, 'r') as f:
+        with open(output_file, 'r', encoding='cp1252') as f:
             for i, line in enumerate(f):
                 if re.compile(r'Fin :.*: Débit_Riv\n').findall(line):
                     end_river = i
@@ -192,7 +192,7 @@ class GardeniaModel(object):
                 elif re.compile(r': Niveau_Aquif\n').findall(line):
                     beg_piezo = i + 1
 
-        with open(output_file, 'r') as f:
+        with open(output_file, 'r', encoding='cp1252') as f:
             n_lines = len(f.readlines())
 
         if not bool(int(self._tree['general_settings']['forecast_run'])):

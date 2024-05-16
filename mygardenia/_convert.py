@@ -467,7 +467,7 @@ def convert_to_gar_content(
 def _parse_file(file: str, parser: dict) -> dict:
     d = {}
 
-    with open(file, 'r') as f:
+    with open(file, 'r', encoding='cp1252') as f:
         # explore file line by line
         for ln, txt in enumerate(f, start=1):
             # if line number contained in parser, there is parsing to do
