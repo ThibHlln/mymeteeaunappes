@@ -229,14 +229,14 @@ def save_withdrawal(
         filename: str = None,
         start: str = None, end: str = None
 ):
-    """Generate a PRN file containing the observed piezometric data
-    for a given station.
+    """Generate a PRN file containing the withdrawal data for a given
+    station from BNPE via Hub'Eau.
 
     :Parameters:
 
-        code_bss: `str`
-            The BSS code of the piezometric station for which groundwater
-            level data is requested from ADES via Hub'Eau.
+        code_ouvrage: `str`
+            The code of the withdrawal point for which extracted water
+            volume data is requested from BNPE via Hub'Eau.
 
         working_dir: `str`
             The file path the working directory to use to store the data.
